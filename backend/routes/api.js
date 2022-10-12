@@ -7,17 +7,16 @@ const { UploadNFT, ObjectIdToTokenId, TokenIdToObjectId, GetNFTMetadata, GetOwne
 const { GetMongoCollection } = require('../utils/MongoDB');
 const { NFTLandCollectionContractAddress } = require('../constants');
 const { marketContract } = require('../utils/Contract');
-const fileUpload = require('express-fileupload');
+const { staticDir: UPLOAD_DIR, staticUrl, tempDir: TEMP_DIR } = require("../configs");
+// const IMAGE_UPLOAD_DIR = path.join(__dirname, "temp", "data");
 
-const IMAGE_UPLOAD_DIR = path.join(__dirname, "temp", "data");
-
-const fileUploadMiddleware = fileUpload({
+const fileUploadMiddleware = () => fileUpload({
     createParentPath: true,
     preserveExtension: true,
     safeFileNames: true,
     abortOnLimit: true,
     useTempFiles: true,
-    tempFileDir: path.join(__dirname, 'temp'),
+    tempFileDir: TEMP_DIR,
     debug: true,
     uploadTimeout: 45000,
     limits: {
@@ -76,7 +75,7 @@ router.get('/ping/:a/:b', function (req, res, next) {
 });
 
 // 测试form文件上传接口
-router.post('/test/upload', (req, res) => {
+router.post('/test/upload', fileUploadMiddleware(), (req, res) => {
     if (!req.files || Object.keys(req.files).length === 0) {
         return res.status(StatusCodes.BAD_REQUEST).send('no files were uploaded.')
     }
@@ -92,7 +91,7 @@ router.post('/test/upload', (req, res) => {
 });
 
 // 创建NFT
-router.post('/nft/create', async (req, res) => {
+router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
     if (!req.files || Object.keys(req.files).length === 0) {
         return res.status(StatusCodes.BAD_REQUEST).send('no files were uploaded.')
     }

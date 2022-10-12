@@ -8,7 +8,7 @@ const NumberInput = ({
 }) => {
     const enforceNumber = e => {
         const value = e.target.value;
-        if ((value === '' || value.match(/^[0-9]+$/)) && value.length < 10) {
+        if ((value === '' || value.match(/^[0-9]+$/)) && value.length < 8) {
             onChange && onChange(value);
         }
     };

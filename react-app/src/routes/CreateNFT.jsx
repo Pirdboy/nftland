@@ -15,8 +15,10 @@ import {
     Tooltip,
     useToast
 } from "@chakra-ui/react";
-import { QuestionOutlineIcon, InfoOutlineIcon } from "@chakra-ui/icons";
+import { InfoOutlineIcon } from "@chakra-ui/icons";
 import { useAccountContext } from "../contexts/Account";
+import NumberInput from "../components/NumberInput";
+import { TestUpload } from "../utils/ServerApi";
 
 
 const CreateNFT = () => {
@@ -28,8 +30,11 @@ const CreateNFT = () => {
     const [descInvalid, setDescInvalid] = useState(false);
     const [inputFile, setInputFile] = useState(null);
     const [fileInvalid, setFileInvalid] = useState(false);
+    const [totalSupply, setTotalSupply] = useState('');
+    const [totalSupplyInvalid, setTotalSupplyInvalid] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const [createMode, setCreateMode] = useState('1');
+
+    console.log("env NODE_ENV", process.env.NODE_ENV);
 
     const showErrorToast = (title, errorMessage) => {
         toast({
@@ -41,12 +46,6 @@ const CreateNFT = () => {
             position: 'top'
         })
     }
-    const normalCreate = async () => {
-        console.log('normalCreate');
-    };
-    const freeCreate = async () => {
-        console.log('freeCreate');
-    };
     const onChangeName = e => {
         setNameInvalid(false);
         setErrorMessage("");
@@ -61,6 +60,11 @@ const CreateNFT = () => {
         setFileInvalid(false);
         setErrorMessage("");
         setInputFile(e.target.files[0]);
+    }
+    const onChangeTotalSupply = val => {
+        setTotalSupplyInvalid(false);
+        setErrorMessage("");
+        setTotalSupply(val);
     }
     const onClickCreate = async e => {
         if (!account) {
@@ -82,23 +86,20 @@ const CreateNFT = () => {
             setErrorMessage("image is required");
             return
         }
-        // TODO: 访问后端
-        if (createMode === '1') {
-            await normalCreate();
-        } else if (createMode === '2') {
-            await freeCreate();
+        const t = Number(totalSupply);
+        if(isNaN(t) || t <= 0) {
+            setTotalSupplyInvalid(true);
+            setErrorMessage("totalSupply must be greater than zero");
+            return
         }
+        await TestUpload(inputFile);
     }
 
     // const createModeTips = "Sit nulla est ex deserunt exercitation anim occaecat. Nostrud ullamco deserunt aute id consequat veniam incididunt duis in sint irure nisi. Mollit officia cillum Lorem ullamco minim nostrud elit officia tempor esse quis.Sunt ad dolore quis aut"
 
     const createModeTips = (
         <Box>
-            <Text>{"It's a lazy minting which only occurs when necessary:"}</Text>
-            <Box pl="10px" pr="10px" pt="5px" pb="5px">
-                <Text >{"1. When you transfer an item to another account"}</Text>
-                <Text >{"2. When someone buys an item from you"}</Text>
-            </Box>
+            <Text>{"It's a lazy minting which only occurs when someone buys an item from you. "}</Text>
             <Text>
                 {"This means that you can create NFT for free"}
             </Text>
@@ -121,6 +122,8 @@ const CreateNFT = () => {
                     {
                         errorMessage ? <Text color="red.500" fontSize="lg">{errorMessage}</Text> : null
                     }
+                    <FormLabel>Total Supply</FormLabel>
+                    <NumberInput value={totalSupply} onChange={onChangeTotalSupply} isInvalid={totalSupplyInvalid} />
                     <Box h="5px"></Box>
                     <Flex>
                         {"create is free"}

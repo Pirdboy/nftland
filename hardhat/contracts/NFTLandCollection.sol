@@ -24,9 +24,9 @@ contract NFTLandCollection is ERC1155, Ownable {
         _;
     }
 
-    function mint(address _account, uint _id, uint _amount) onlyMarket external {
+    function mint(address _creator, uint _id, uint _amount) onlyMarket external {
         require(!exist(_id), "this token has been minted");
-        _mint(_account, _id, _amount, "");
+        _mint(_creator, _id, _amount, "");
         totalSupply[_id] = _amount;
     }
 
