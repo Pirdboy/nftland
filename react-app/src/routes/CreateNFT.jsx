@@ -18,12 +18,12 @@ import {
 import { InfoOutlineIcon } from "@chakra-ui/icons";
 import { useAccountContext } from "../contexts/Account";
 import NumberInput from "../components/NumberInput";
-import { TestUpload } from "../utils/ServerApi";
+import ServerApi from "../utils/ServerApi";
 
 
 const CreateNFT = () => {
     const toast = useToast();
-    const { account } = useAccountContext();
+    const { account, signer } = useAccountContext();
     const [name, setName] = useState('');
     const [nameInvalid, setNameInvalid] = useState(false);
     const [desc, setDesc] = useState('');
@@ -42,6 +42,16 @@ const CreateNFT = () => {
             description: errorMessage,
             duration: 1500,
             status: 'error',
+            isClosable: false,
+            position: 'top'
+        })
+    }
+    const showSuccessToast = (title, message) => {
+        toast({
+            title: title,
+            description: message,
+            duration: 1500,
+            status: 'success',
             isClosable: false,
             position: 'top'
         })
@@ -92,7 +102,9 @@ const CreateNFT = () => {
             setErrorMessage("totalSupply must be greater than zero");
             return
         }
-        await TestUpload(inputFile);
+        await ServerApi.TestUpload(inputFile);
+        // const response = await ServerApi.CreateNft(name, desc, inputFile, totalSupply, signer, account);
+        // showSuccessToast("Create NFT", `${response}`);
     }
 
     // const createModeTips = "Sit nulla est ex deserunt exercitation anim occaecat. Nostrud ullamco deserunt aute id consequat veniam incididunt duis in sint irure nisi. Mollit officia cillum Lorem ullamco minim nostrud elit officia tempor esse quis.Sunt ad dolore quis aut"

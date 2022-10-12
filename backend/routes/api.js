@@ -7,9 +7,11 @@ const { UploadNFT, ObjectIdToTokenId, TokenIdToObjectId, GetNFTMetadata, GetOwne
 const { GetMongoCollection } = require('../utils/MongoDB');
 const { NFTLandCollectionContractAddress } = require('../constants');
 const { marketContract } = require('../utils/Contract');
+const { Signature } = require('../utils/Signature');
 const { staticDir: UPLOAD_DIR, staticUrl, tempDir: TEMP_DIR } = require("../configs");
 const fileUpload = require('express-fileupload');
-// const IMAGE_UPLOAD_DIR = path.join(__dirname, "temp", "data");
+
+const messageToSign = "This request will not trigger a blockchain transaction or cost any gas fees. We need the signature to prove you are the creator";
 
 const fileUploadMiddleware = () => fileUpload({
     createParentPath: true,
@@ -35,7 +37,9 @@ const nftCreateValidate = (name, description, creator, totalSupply) => {
     if (typeof creator !== 'string' || !creator) {
         return false;
     }
-    if (typeof totalSupply !== 'number' || totalSupply <= 0) {
+
+    const t = Number(totalSupply);
+    if (isNaN(t)|| t <= 0) {
         return false
     }
     return true;
@@ -82,6 +86,8 @@ router.post('/test/upload', fileUploadMiddleware(), (req, res) => {
     }
     const name = req.body?.name;
     const symbol = req.body?.symbol;
+    console.log("typeof name is", typeof name);
+    console.log("typeof symbol is", typeof symbol);
     let imageFile = req.files.image;
     let tempFilePath = imageFile.tempFilePath;
     console.log(`test upload name: ${name}, symbol: ${symbol} tempFilePath: ${tempFilePath}`);
@@ -91,8 +97,27 @@ router.post('/test/upload', fileUploadMiddleware(), (req, res) => {
     });
 });
 
-// 创建NFT
 router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(StatusCodes.BAD_REQUEST).send('no files were uploaded.')
+    }
+    const name = req.body?.name;
+    const description = req.body?.description;
+    const creator = req.body?.creator;
+    const totalSupply = req.body?.totalSupply;
+    const signature = req.body?.signature;
+    if (!nftCreateValidate(name, description, creator, totalSupply)) {
+        return res.status(StatusCodes.BAD_REQUEST).send('bad request body.');
+    }
+    if(!Signature.VerifyEIP191Signature(messageToSign, signature, creator)) {
+        return res.status(StatusCodes.BAD_REQUEST).send('signature incorrect');
+    }
+    // ..........................
+
+})
+
+// 创建NFT(弃用)
+router.post('/old_createnft', fileUploadMiddleware(), async (req, res) => {
     if (!req.files || Object.keys(req.files).length === 0) {
         return res.status(StatusCodes.BAD_REQUEST).send('no files were uploaded.')
     }

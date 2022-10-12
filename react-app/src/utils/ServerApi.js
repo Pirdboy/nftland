@@ -1,41 +1,42 @@
-import { ethers } from 'ethers';
-
 const axios = require('axios').default;
 
-// const FormData = require('form-data');
-// const fs = require('node:fs');
-// const path = require('node:path');
-// const { ethers } = require('ethers');
-// const { ObjectId } = require('mongodb');
-// const { url: NFTStorageHTTPAPI, apiKey: NFTStorageAPIKey } = require("../configs").nftstorage;
-// const alchemyConfig = require('../configs').alchemy.goerli;
-// const { Alchemy } = require("alchemy-sdk");
-// const alchemy = new Alchemy(alchemyConfig);
-// const gatewayURL = "https://cloudflare-ipfs.com/ipfs/";
+const messageToSign = "This request will not trigger a blockchain transaction or cost any gas fees. We need the signature to prove you are the creator";
+
 
 const createNftUrl = {
     "development": "http://192.168.25.129/api/createnft",
     "production": "",
 };
 
-const CreateNft = async (name, description, imageFile, creator, totalSupply) => {
+class ServerApi {
+    static async CreateNft(name, description, imageFile, totalSupply, signer, account) {
+        let signature = await signer.signMessage(messageToSign);
+        const postUrl = createNftUrl[process.env.NODE_ENV];
+        let formData = new FormData();
+        formData.append("name", name);
+        formData.append("description", description);
+        formData.append("image", imageFile);
+        formData.append("creator", account);
+        formData.append("totalSupply", totalSupply);
+        formData.append("signautre", signature);
+        const response = await axios.post(postUrl, formData);
+        return response.data;
+    }
 
-}
-
-const TestUpload = async (imageFile) => {
-    const url = "http://192.168.25.129/api/test/upload";
-    let name = "uploadName";
-    let symbol = "UP";
-    let formData = new FormData();
-    formData.append('name', name);
-    formData.append('symbol', symbol);
-    formData.append('image', imageFile);
-    const response = await axios.post(url, formData);
-    const resBody = response.data;
-    console.log(resBody);
+    static async TestUpload(imageFile) {
+        const url = "http://192.168.25.129/api/test/upload";
+        let name = "uploadName";
+        let symbol = "UP";
+        let formData = new FormData();
+        formData.append('name', name);
+        formData.append('symbol', symbol);
+        formData.append('image', imageFile);
+        const response = await axios.post(url, formData);
+        const resBody = response.data;
+        console.log(resBody);
+    }
 };
 
-export {
-    CreateNft,
-    TestUpload
-}
+
+
+export default ServerApi;
