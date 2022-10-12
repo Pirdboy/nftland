@@ -26,7 +26,7 @@ class ServerApi {
     static async TestUpload(imageFile) {
         const url = "http://192.168.25.129/api/test/upload";
         let name = "uploadName";
-        let symbol = "UP";
+        let symbol = "100";
         let formData = new FormData();
         formData.append('name', name);
         formData.append('symbol', symbol);

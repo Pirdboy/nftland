@@ -3,6 +3,7 @@ const router = express.Router();
 const axios = require('axios').default;
 const { StatusCodes } = require('http-status-codes');
 const path = require('path');
+const fs = require('node:fs/promises');
 const { UploadNFT, ObjectIdToTokenId, TokenIdToObjectId, GetNFTMetadata, GetOwnersForNFT, IPFSGatewayURL, GetSaleOrderTypedData } = require('../utils/NFT');
 const { GetMongoCollection } = require('../utils/MongoDB');
 const { NFTLandCollectionContractAddress } = require('../constants');
@@ -28,16 +29,9 @@ const fileUploadMiddleware = () => fileUpload({
 });
 
 const nftCreateValidate = (name, description, creator, totalSupply) => {
-    if (typeof name !== 'string' || !name) {
+    if (!name || !description || !creator) {
         return false;
     }
-    if (typeof description !== 'string' || !description) {
-        return false;
-    }
-    if (typeof creator !== 'string' || !creator) {
-        return false;
-    }
-
     const t = Number(totalSupply);
     if (isNaN(t)|| t <= 0) {
         return false
@@ -45,10 +39,10 @@ const nftCreateValidate = (name, description, creator, totalSupply) => {
     return true;
 }
 const nftQueryValidate = (tokenAddress, tokenId) => {
-    if (typeof tokenAddress !== 'string' || tokenAddress.length !== 42) {
+    if (tokenAddress?.length !== 42) {
         return false;
     }
-    if (typeof tokenId !== 'string' || !tokenId) {
+    if (!tokenId) {
         return false;
     }
     return true;
@@ -90,7 +84,7 @@ router.post('/test/upload', fileUploadMiddleware(), (req, res) => {
     console.log("typeof symbol is", typeof symbol);
     let imageFile = req.files.image;
     let tempFilePath = imageFile.tempFilePath;
-    console.log(`test upload name: ${name}, symbol: ${symbol} tempFilePath: ${tempFilePath}`);
+    console.log(`test upload, fileName: ${imageFile.name}, name: ${name}, symbol: ${symbol} tempFilePath: ${tempFilePath}`);
     return res.send({
         name: name,
         symbol: symbol
@@ -98,7 +92,7 @@ router.post('/test/upload', fileUploadMiddleware(), (req, res) => {
 });
 
 router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
-    if (!req.files || Object.keys(req.files).length === 0) {
+    if (!req.files?.image) {
         return res.status(StatusCodes.BAD_REQUEST).send('no files were uploaded.')
     }
     const name = req.body?.name;
@@ -113,7 +107,13 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
         return res.status(StatusCodes.BAD_REQUEST).send('signature incorrect');
     }
     // ..........................
-
+    try {
+        let imageFile = req.files.image;
+        let tempFilePath = imageFile.tempFilePath;
+        let imageMD5 = imageFile.md5;
+    } catch (error) {
+        
+    }
 })
 
 // 创建NFT(弃用)
