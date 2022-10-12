@@ -84,7 +84,7 @@ router.post('/test/upload', fileUploadMiddleware(), (req, res) => {
     console.log("typeof symbol is", typeof symbol);
     let imageFile = req.files.image;
     let tempFilePath = imageFile.tempFilePath;
-    console.log(`test upload, fileName: ${imageFile.name}, name: ${name}, symbol: ${symbol} tempFilePath: ${tempFilePath}`);
+    console.log(`test upload, fileName: ${imageFile.name}, ext:${path.extname(imageFile.name)}, name: ${name}, symbol: ${symbol} tempFilePath: ${tempFilePath}`);
     return res.send({
         name: name,
         symbol: symbol
