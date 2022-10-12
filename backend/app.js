@@ -22,6 +22,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.all('/*', (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "POST, GET");
+    res.header("Access-Control-Allow-Headers", "accept, content-type");
+    next();
+})
+
+
 // fileUpload
 // app.use(fileUpload({
 //     createParentPath: true,
@@ -52,7 +60,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // });
 
 app.use('/api', apiRouter);
-app.use('/apitest',apiTestRouter);
+app.use('/apitest', apiTestRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

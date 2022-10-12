@@ -14,7 +14,7 @@ const axios = require('axios').default;
 // const gatewayURL = "https://cloudflare-ipfs.com/ipfs/";
 
 const createNftUrl = {
-    "development": "http://192.168.25.129/nftland/api/createnft",
+    "development": "http://192.168.25.129/api/createnft",
     "production": "",
 };
 
@@ -23,7 +23,7 @@ const CreateNft = async (name, description, imageFile, creator, totalSupply) => 
 }
 
 const TestUpload = async (imageFile) => {
-    const url = "http://192.168.25.129/nftland/api/test/upload";
+    const url = "http://192.168.25.129/api/test/upload";
     let name = "uploadName";
     let symbol = "UP";
     let formData = new FormData();
