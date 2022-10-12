@@ -1,0 +1,41 @@
+{
+    "folders": [
+        {
+            "name": "backend",
+            "path": "./backend"
+        },
+		{
+            "name": "examples",
+            "path": "./examples"
+        },
+        {
+            "name": "hardhat",
+            "path": "./hardhat"
+        },
+        {
+            "name": "react-app",
+            "path": "./react-app"
+        },
+		{
+            "name": "temp",
+            "path": "./temp"
+        },
+        {
+            "name": "nftland",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "solidity.formatter": "prettier",
+        "[solidity]": {
+            "editor.formatOnSave": false,
+            "editor.defaultFormatter": "JuanBlanco.solidity"
+        },
+        "solidity.compileUsingRemoteVersion": "v0.8.13+commit.abaa5c0e",
+        "path-intellisense.extensionOnImport": true,
+        "[rust]": {
+            "editor.defaultFormatter": "statiolake.vscode-rustfmt",
+            "editor.formatOnSave": true,
+        }
+    }
+}
