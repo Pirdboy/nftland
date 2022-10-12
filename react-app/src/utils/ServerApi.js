@@ -19,7 +19,7 @@ class ServerApi {
         formData.append("image", imageFile);
         formData.append("creator", account);
         formData.append("totalSupply", totalSupply);
-        formData.append("signautre", signature);
+        formData.append("signature", signature);
         const response = await axios.post(postUrl, formData);
         return response.data;
     }
