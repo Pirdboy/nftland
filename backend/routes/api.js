@@ -8,6 +8,7 @@ const { GetMongoCollection } = require('../utils/MongoDB');
 const { NFTLandCollectionContractAddress } = require('../constants');
 const { marketContract } = require('../utils/Contract');
 const { staticDir: UPLOAD_DIR, staticUrl, tempDir: TEMP_DIR } = require("../configs");
+const fileUpload = require('express-fileupload');
 // const IMAGE_UPLOAD_DIR = path.join(__dirname, "temp", "data");
 
 const fileUploadMiddleware = () => fileUpload({
