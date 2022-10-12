@@ -12,7 +12,7 @@ const { Signature } = require('../utils/Signature');
 const { staticDir, staticUrl, tempDir } = require("../configs");
 const fileUpload = require('express-fileupload');
 
-const messageToSign = "This request will not trigger a blockchain transaction or cost any gas fees. We need the signature to prove you are the creator";
+const messageToSign = "This request will not trigger a blockchain transaction or cost any gas fees.\n\nWe need the signature to prove you are the creator";
 
 const fileUploadMiddleware = () => fileUpload({
     createParentPath: true,
@@ -102,6 +102,7 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
     const creator = req.body?.creator;
     const totalSupply = Number(req.body?.totalSupply);
     const signature = req.body?.signature;
+    console.log(`request params |name:${name} |description:${description} |creator:${creator} |totalSupply:${totalSupply} |signature:${signature}`);
     if (!nftCreateValidate(name, description, creator, totalSupply)) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request body.');
     }

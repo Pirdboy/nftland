@@ -1,6 +1,6 @@
 const axios = require('axios').default;
 
-const messageToSign = "This request will not trigger a blockchain transaction or cost any gas fees. We need the signature to prove you are the creator";
+const messageToSign = "This request will not trigger a blockchain transaction or cost any gas fees.\n\nWe need the signature to prove you are the creator";
 
 
 const createNftUrl = {
