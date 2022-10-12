@@ -124,8 +124,9 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
         });
         await mvFile;
         const imageUrl = staticUrl + imageFileName;
+        const now = Date.now();
         const metadata = {
-            date: Date.now(),
+            date: now,
             image: imageUrl,
             name,
             description,
@@ -140,7 +141,7 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
         await fs.writeFile(metadataPath, metadataStr);
         const metadataUrl = staticUrl + metadataFileName;
         const collection = GetMongoCollection('nft');
-        const now = Date.now();
+
         const result = await collection.insertOne({
             _id: _id,
             contractAddress: NFTLandCollectionContractAddress,
