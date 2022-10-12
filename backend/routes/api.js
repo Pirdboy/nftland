@@ -5,11 +5,11 @@ const { StatusCodes } = require('http-status-codes');
 const path = require('path');
 const fs = require('node:fs/promises');
 const { UploadNFT, ObjectIdToTokenId, TokenIdToObjectId, GetNFTMetadata, GetOwnersForNFT, IPFSGatewayURL, GetSaleOrderTypedData } = require('../utils/NFT');
-const { GetMongoCollection } = require('../utils/MongoDB');
+const { GetMongoCollection, CreateObjectId } = require('../utils/MongoDB');
 const { NFTLandCollectionContractAddress } = require('../constants');
 const { marketContract } = require('../utils/Contract');
 const { Signature } = require('../utils/Signature');
-const { staticDir: UPLOAD_DIR, staticUrl, tempDir: TEMP_DIR } = require("../configs");
+const { staticDir, staticUrl, tempDir } = require("../configs");
 const fileUpload = require('express-fileupload');
 
 const messageToSign = "This request will not trigger a blockchain transaction or cost any gas fees. We need the signature to prove you are the creator";
@@ -20,7 +20,7 @@ const fileUploadMiddleware = () => fileUpload({
     safeFileNames: true,
     abortOnLimit: true,
     useTempFiles: true,
-    tempFileDir: TEMP_DIR,
+    tempFileDir: tempDir,
     debug: true,
     uploadTimeout: 45000,
     limits: {
@@ -85,6 +85,8 @@ router.post('/test/upload', fileUploadMiddleware(), (req, res) => {
     let imageFile = req.files.image;
     let tempFilePath = imageFile.tempFilePath;
     console.log(`test upload, fileName: ${imageFile.name}, ext:${path.extname(imageFile.name)}, name: ${name}, symbol: ${symbol} tempFilePath: ${tempFilePath}`);
+    const _id = CreateObjectId();
+    console.log(`_id.str: ${_id.str} _id.toString(): ${_id.toString()} _id.valueOf(): ${_id.valueOf()} _id.toHexString(): ${_id.toHexString()}`);
     return res.send({
         name: name,
         symbol: symbol
@@ -108,11 +110,29 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
     }
     // ..........................
     try {
-        let imageFile = req.files.image;
-        let tempFilePath = imageFile.tempFilePath;
-        let imageMD5 = imageFile.md5;
-    } catch (error) {
+        const imageFile = req.files.image;
+        const imageFileName = `${imageFile.md5}.${path.extname(imageFile.name)}`;
+        const uploadPath = staticDir + imageFileName; 
+        const mvFile = new Promise((resolve, _) => {
+            imageFile.mv(uploadPath, err => {
+                if (err) {
+                    throw err;
+                }
+                resolve();
+            });
+        });
+        await mvFile;
+        const imageUrl = staticUrl + imageFileName;
+        const metadata = {
+            date: Date.now(),
+            image: imageUrl,
+            name,
+            description,
+            properties:{}
+        };
         
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
     }
 })
 

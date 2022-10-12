@@ -11,5 +11,6 @@ describe("ObjectId test", function () {
         const tokenId2 = ethers.BigNumber.from(tokenIdString);
         const tokenIdHexString = tokenId2.toHexString();
         console.log(tokenIdHexString.slice(2));
+        expect(tokenIdHexString).to.eq(`0x${_id}`);
     });
 });
