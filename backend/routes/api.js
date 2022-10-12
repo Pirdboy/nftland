@@ -112,7 +112,7 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
     // ..........................
     try {
         const imageFile = req.files.image;
-        const imageFileName = `${imageFile.md5}.${path.extname(imageFile.name)}`;
+        const imageFileName = `${imageFile.md5}${path.extname(imageFile.name)}`;
         const uploadPath = staticDir + imageFileName; 
         const mvFile = new Promise((resolve, _) => {
             imageFile.mv(uploadPath, err => {

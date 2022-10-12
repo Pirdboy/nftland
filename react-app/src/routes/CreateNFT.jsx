@@ -35,7 +35,7 @@ const CreateNFT = () => {
         toast({
             title: title,
             description: errorMessage,
-            duration: 1500,
+            duration: 2000,
             status: 'error',
             isClosable: false,
             position: 'top'
@@ -45,7 +45,7 @@ const CreateNFT = () => {
         toast({
             title: title,
             description: message,
-            duration: 1500,
+            duration: 2000,
             status: 'success',
             isClosable: false,
             position: 'top'
@@ -99,7 +99,7 @@ const CreateNFT = () => {
         }
         // await ServerApi.TestUpload(inputFile);
         const response = await ServerApi.CreateNft(name, desc, inputFile, totalSupply, signer, account);
-        showSuccessToast("Create NFT", `${response}`);
+        showSuccessToast("Create NFT", 'success');
         // await ServerApi.TestSignMessage(signer);
     }
 
