@@ -17,6 +17,8 @@ const mongodbClient = require('../utils/MongoDB').GetMongoClient();
 var port = normalizePort(process.env.PORT || '3060');
 app.set('port', port);
 
+console.log("NODE_ENV", process.env.NODE_ENV);
+
 /**
  * Create HTTP server.
  */

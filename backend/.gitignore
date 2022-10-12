@@ -21,3 +21,4 @@ dist
 temp
 configs/
 example/
+run.sh
