@@ -49,7 +49,7 @@ const UploadNFT = async (name, description, imagePath) => {
  * @returns {string}
  */
 const ObjectIdToTokenId = (objectId) => {
-    const tokenId = ethers.BigNumber.from(`0x${objectId.toString()}`);
+    const tokenId = ethers.BigNumber.from(`0x${objectId.toHexString()}`);
     return tokenId.toString();
 }
 

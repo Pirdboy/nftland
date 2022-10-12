@@ -5,7 +5,7 @@ const { StatusCodes } = require('http-status-codes');
 const path = require('path');
 const fs = require('node:fs/promises');
 const { UploadNFT, ObjectIdToTokenId, TokenIdToObjectId, GetNFTMetadata, GetOwnersForNFT, IPFSGatewayURL, GetSaleOrderTypedData } = require('../utils/NFT');
-const { GetMongoCollection, CreateObjectId } = require('../utils/MongoDB');
+const { GetMongoCollection, GenerateObjectId } = require('../utils/MongoDB');
 const { NFTLandCollectionContractAddress } = require('../constants');
 const { marketContract } = require('../utils/Contract');
 const { Signature } = require('../utils/Signature');
@@ -85,7 +85,7 @@ router.post('/test/upload', fileUploadMiddleware(), (req, res) => {
     let imageFile = req.files.image;
     let tempFilePath = imageFile.tempFilePath;
     console.log(`test upload, fileName: ${imageFile.name}, ext:${path.extname(imageFile.name)}, name: ${name}, symbol: ${symbol} tempFilePath: ${tempFilePath}`);
-    const _id = CreateObjectId();
+    const _id = GenerateObjectId();
     console.log(`_id.str: ${_id.str} _id.toString(): ${_id.toString()} _id.valueOf(): ${_id.valueOf()} _id.toHexString(): ${_id.toHexString()}`);
     return res.send({
         name: name,
@@ -100,7 +100,7 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
     const name = req.body?.name;
     const description = req.body?.description;
     const creator = req.body?.creator;
-    const totalSupply = req.body?.totalSupply;
+    const totalSupply = Number(req.body?.totalSupply);
     const signature = req.body?.signature;
     if (!nftCreateValidate(name, description, creator, totalSupply)) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request body.');
@@ -130,7 +130,37 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
             description,
             properties:{}
         };
-        
+        const metadataStr = JSON.stringify(metadata);
+        const _id = GenerateObjectId();
+        console.log("generate new _id", _id.toHexString());
+        const tokenId = ObjectIdToTokenId(_id);
+        const metadataFileName = tokenId + ".json";
+        const metadataPath = staticDir + metadataFileName;
+        await fs.writeFile(metadataPath, metadataStr);
+        const metadataUrl = staticUrl + metadataFileName;
+        const collection = GetMongoCollection('nft');
+        const now = Date.now();
+        const result = await collection.insertOne({
+            _id: _id,
+            contractAddress: NFTLandCollectionContractAddress,
+            name,
+            description,
+            metadata: metadataStr,
+            metadataUrl,
+            totalSupply: totalSupply,
+            creator: creator,
+            minted: false,
+            owners: [{
+                [creator]: totalSupply
+            }],
+            createAt: now,
+            updateAt: now
+        });
+        console.log("inserted _id", result.insertedId.toString());
+        return res.send({
+            tokenId,
+            contractAddress: NFTLandCollectionContractAddress
+        });
     } catch (error) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
     }

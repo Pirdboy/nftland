@@ -21,7 +21,11 @@ function GetMongoClient() {
     return client;
 }
 
-function CreateObjectId() {
+/**
+ * 生成ObjectId
+ * @returns {ObjectId}
+ */
+function GenerateObjectId() {
     return ObjectId();
 }
 
@@ -33,5 +37,5 @@ function GetMongoCollection(name) {
 module.exports = {
     GetMongoClient,
     GetMongoCollection,
-    CreateObjectId
+    GenerateObjectId
 }
