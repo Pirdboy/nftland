@@ -164,9 +164,9 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
             totalSupply: totalSupply,
             creator: creator,
             minted: false,
-            owners: [{
+            owners: {
                 [creator]: totalSupply
-            }],
+            },
             createAt: now,
             updateAt: now
         });
@@ -197,7 +197,9 @@ router.get("/getnftsforowner/:account", async (req, res) => {
             ]
         }).toArray();
         for (let i = 0; i < nftsInDB.length; i++) {
+            
             let e = nftsInDB[i];
+            console.log(e);
             let tokenId = ObjectIdToTokenId(e._id);
             let k = `${e.contractAddress}_${tokenId}`;
             allNftsMap[k] = {
