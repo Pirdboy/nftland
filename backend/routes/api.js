@@ -189,44 +189,84 @@ router.get("/getnftsforowner/:account", async (req, res) => {
     try {
         let collection = GetMongoCollection('nft');
         let ownerKey = "owners." + account;
+        let allNftsMap = {};  // 去重用, 如果链上有数据, 都以链上为准
         let nftsInDB = await collection.find({
             $and: [
                 { [ownerKey]: { $gt: 0 } },
                 { 'minted': false },
             ]
         }).toArray();
-        nftsInDB = nftsInDB.map(e => {
-            return {
+        for (let i = 0; i < nftsInDB.length; i++) {
+            let e = nftsInDB[i];
+            let tokenId = ObjectIdToTokenId(e._id);
+            let k = `${e.contractAddress}_${tokenId}`;
+            allNftsMap[k] = {
                 "contract": {
                     "address": e.contractAddress,
                     "name": NFTLandCollectionName,
                     "symbol": NFTLandCollectionSymbol
                 },
                 "tokenType": "ERC1155",
-                "tokenId": ObjectIdToTokenId(e._id),
+                "tokenId": tokenId,
                 "balance": `${e.owners[account]}`,
                 "metadata": JSON.parse(e.metadata),
                 "metadataUrl": e.metaDataUrl,
                 "timeLastUpdated": e.updateAt
-            }
-        });
+            };
+        }
+        // nftsInDB = nftsInDB.map(e => {
+        //     return {
+        //         "contract": {
+        //             "address": e.contractAddress,
+        //             "name": NFTLandCollectionName,
+        //             "symbol": NFTLandCollectionSymbol
+        //         },
+        //         "tokenType": "ERC1155",
+        //         "tokenId": ObjectIdToTokenId(e._id),
+        //         "balance": `${e.owners[account]}`,
+        //         "metadata": JSON.parse(e.metadata),
+        //         "metadataUrl": e.metaDataUrl,
+        //         "timeLastUpdated": e.updateAt
+        //     }
+        // });
         let nftsOnChain = await GetNFTsForOwner(account);
-        nftsOnChain = nftsOnChain.map(e => {
-            return {
+        for (let i = 0; i < nftsOnChain.length; i++) {
+            let e = nftsOnChain[i];
+            let tokenId = BigNumber.from(e.id.tokenId).toString();
+            let k = `${e.contract.address}_${tokenId}`;
+            allNftsMap[k] = {
                 "contract": {
                     "address": e.contract.address,
                     "name": e.contractMetadata.name,
                     "symbol": e.contractMetadata.symbol
                 },
                 "tokenType": e.id.tokenMetadata.tokenType,
-                "tokenId": BigNumber.from(e.id.tokenId).toString(),
+                "tokenId": tokenId,
                 "balance": `${e.balance}`,
                 "metadata": e.metadata,
                 "metadataUrl": IPFSGatewayURL(e.tokenUri.raw),
                 "timeLastUpdated": (new Date(e.timeLastUpdated)).getTime(),
             }
-        });
-        let allNftsForOwner = [...nftsInDB, ...nftsOnChain];
+        }
+        // nftsOnChain = nftsOnChain.map(e => {
+        //     return {
+        //         "contract": {
+        //             "address": e.contract.address,
+        //             "name": e.contractMetadata.name,
+        //             "symbol": e.contractMetadata.symbol
+        //         },
+        //         "tokenType": e.id.tokenMetadata.tokenType,
+        //         "tokenId": BigNumber.from(e.id.tokenId).toString(),
+        //         "balance": `${e.balance}`,
+        //         "metadata": e.metadata,
+        //         "metadataUrl": IPFSGatewayURL(e.tokenUri.raw),
+        //         "timeLastUpdated": (new Date(e.timeLastUpdated)).getTime(),
+        //     }
+        // });
+        let allNftsArray = Object.values(allNftsMap);
+        allNftsArray.sort((a, b) => {
+            return b.timeLastUpdated - a.timeLastUpdated;
+        })
         return res.send(allNftsForOwner);
     } catch (error) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
