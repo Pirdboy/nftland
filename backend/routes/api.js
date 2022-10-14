@@ -269,6 +269,7 @@ router.get("/getnftsforowner/:account", async (req, res) => {
         })
         return res.send(allNftsForOwner);
     } catch (error) {
+        console.log(error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
     }
 });
