@@ -93,6 +93,7 @@ router.post('/test/upload', fileUploadMiddleware(), (req, res) => {
     });
 });
 
+// 创建 nft
 router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
     if (!req.files?.image) {
         return res.status(StatusCodes.BAD_REQUEST).send('no files were uploaded.')
@@ -141,7 +142,6 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
         await fs.writeFile(metadataPath, metadataStr);
         const metadataUrl = staticUrl + metadataFileName;
         const collection = GetMongoCollection('nft');
-
         const result = await collection.insertOne({
             _id: _id,
             contractAddress: NFTLandCollectionContractAddress,
@@ -168,47 +168,22 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
     }
 })
 
-// 创建NFT(弃用)
-router.post('/old_createnft', fileUploadMiddleware(), async (req, res) => {
-    if (!req.files || Object.keys(req.files).length === 0) {
-        return res.status(StatusCodes.BAD_REQUEST).send('no files were uploaded.')
+// 获取一个账户的nft列表
+router.get("/getnftsforowner/:account", async (req, res) => {
+    let account = req.params.account;
+    if(!account) {
+        return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
     }
-    const name = req.body?.name;
-    const description = req.body?.description;
-    const creator = req.body?.creator;
-    const totalSupply = req.body?.totalSupply;
-    if (!nftCreateValidate(name, description, creator, totalSupply)) {
-        return res.status(StatusCodes.BAD_REQUEST).send('bad request body.');
-    }
-    try {
-        let imageFile = req.files.image;
-        let tempFilePath = imageFile.tempFilePath;
-        const { url: metadataUrl } = await UploadNFT(name, description, tempFilePath);
-        const collection = GetMongoCollection("nft");
-        const result = await collection.insertOne({
-            tokenAddress: NFTLandCollectionContractAddress,
-            name: name,
-            description: description,
-            metaDataUrl: metadataUrl,
-            totalSupply: totalSupply,
-            creator: creator,
-            minted: false,
-            owners: [{
-                [creator]: totalSupply
-            }],
-            createAt: Math.floor(Date.now() / 1000),
-        });
-        const insertedId = result.insertedId;
-        console.log("insertedId", insertedId.toString());
-        return res.send({
-            ok: true,
-            tokenId: ObjectIdToTokenId(insertedId),
-            tokenAddress: NFTLandCollectionContractAddress
-        });
-    } catch (error) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
-    }
+    let collection = GetMongoCollection('nft');
+    let ownerKey = "owners."+account;
+    let nftsInDB = await collection.find({
+        [ownerKey]: {$gt:0}
+    }).toArray();
+    console.log(`nftsInDB ${nftsInDB}`);
+    return res.send(nftsInDB);
 });
+
+// ----------------- 旧代码 -----------------------
 
 // 查看某个NFT metadata
 // TODO: 不再存储到IPFS上
