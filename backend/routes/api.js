@@ -2,11 +2,24 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios').default;
 const { StatusCodes } = require('http-status-codes');
+const { BigNumber } = require('ethers');
 const path = require('path');
 const fs = require('node:fs/promises');
-const { UploadNFT, ObjectIdToTokenId, TokenIdToObjectId, GetNFTMetadata, GetOwnersForNFT, IPFSGatewayURL, GetSaleOrderTypedData } = require('../utils/NFT');
+const {
+    ObjectIdToTokenId,
+    TokenIdToObjectId,
+    GetNFTMetadata,
+    GetOwnersForNFT,
+    IPFSGatewayURL,
+    GetSaleOrderTypedData,
+    GetNFTsForOwner
+} = require('../utils/NFT');
 const { GetMongoCollection, GenerateObjectId } = require('../utils/MongoDB');
-const { NFTLandCollectionContractAddress } = require('../constants');
+const {
+    NFTLandCollectionContractAddress,
+    NFTLandCollectionName,
+    NFTLandCollectionSymbol
+} = require('../constants');
 const { marketContract } = require('../utils/Contract');
 const { Signature } = require('../utils/Signature');
 const { staticDir, staticUrl, tempDir } = require("../configs");
@@ -33,7 +46,7 @@ const nftCreateValidate = (name, description, creator, totalSupply) => {
         return false;
     }
     const t = Number(totalSupply);
-    if (isNaN(t)|| t <= 0) {
+    if (isNaN(t) || t <= 0) {
         return false
     }
     return true;
@@ -107,14 +120,13 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
     if (!nftCreateValidate(name, description, creator, totalSupply)) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request body.');
     }
-    if(!Signature.VerifyEIP191Signature(messageToSign, signature, creator)) {
+    if (!Signature.VerifyEIP191Signature(messageToSign, signature, creator)) {
         return res.status(StatusCodes.BAD_REQUEST).send('signature incorrect');
     }
-    // ..........................
     try {
         const imageFile = req.files.image;
         const imageFileName = `${imageFile.md5}${path.extname(imageFile.name)}`;
-        const uploadPath = staticDir + imageFileName; 
+        const uploadPath = staticDir + imageFileName;
         const mvFile = new Promise((resolve, _) => {
             imageFile.mv(uploadPath, err => {
                 if (err) {
@@ -131,7 +143,7 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
             image: imageUrl,
             name,
             description,
-            properties:{}
+            properties: {}
         };
         const metadataStr = JSON.stringify(metadata);
         const _id = GenerateObjectId();
@@ -168,19 +180,57 @@ router.post('/createnft', fileUploadMiddleware(), async (req, res) => {
     }
 })
 
-// 获取一个账户的nft列表
+// 获取一个账户的nft列表, 先不考虑分页
 router.get("/getnftsforowner/:account", async (req, res) => {
     let account = req.params.account;
-    if(!account) {
+    if (!account) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
     }
-    let collection = GetMongoCollection('nft');
-    let ownerKey = "owners."+account;
-    let nftsInDB = await collection.find({
-        [ownerKey]: {$gt:0}
-    }).toArray();
-    console.log(`nftsInDB ${nftsInDB}`);
-    return res.send(nftsInDB);
+    try {
+        let collection = GetMongoCollection('nft');
+        let ownerKey = "owners." + account;
+        let nftsInDB = await collection.find({
+            $and: [
+                { [ownerKey]: { $gt: 0 } },
+                { 'minted': false },
+            ]
+        }).toArray();
+        nftsInDB = nftsInDB.map(e => {
+            return {
+                "contract": {
+                    "address": e.contractAddress,
+                    "name": NFTLandCollectionName,
+                    "symbol": NFTLandCollectionSymbol
+                },
+                "tokenType": "ERC1155",
+                "tokenId": ObjectIdToTokenId(e._id),
+                "balance": `${e.owners[account]}`,
+                "metadata": JSON.parse(e.metadata),
+                "metadataUrl": e.metaDataUrl,
+                "timeLastUpdated": e.updateAt
+            }
+        });
+        let nftsOnChain = await GetNFTsForOwner(account);
+        nftsOnChain = nftsOnChain.map(e => {
+            return {
+                "contract": {
+                    "address": e.contract.address,
+                    "name": e.contractMetadata.name,
+                    "symbol": e.contractMetadata.symbol
+                },
+                "tokenType": e.id.tokenMetadata.tokenType,
+                "tokenId": BigNumber.from(e.id.tokenId).toString(),
+                "balance": `${e.balance}`,
+                "metadata": e.metadata,
+                "metadataUrl": IPFSGatewayURL(e.tokenUri.raw),
+                "timeLastUpdated": (new Date(e.timeLastUpdated)).getTime(),
+            }
+        });
+        let allNftsForOwner = [...nftsInDB, ...nftsOnChain];
+        return res.send(allNftsForOwner);
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
+    }
 });
 
 // ----------------- 旧代码 -----------------------

@@ -10,6 +10,8 @@ const { Alchemy } = require("alchemy-sdk");
 const alchemy = new Alchemy(alchemyConfig);
 const gatewayURL = "https://cloudflare-ipfs.com/ipfs/";
 
+const AlchemyNFTAPI = "https://eth-goerli.g.alchemy.com/nft/v2/"+alchemyConfig.apiKey;
+
 /**
  * 上传IPFS生成MetadataUri
  * @date 2022-09-30
@@ -70,12 +72,14 @@ const TokenIdToObjectId = (tokenId) => {
  */
 const GetNFTsForOwner = async (account) => {
     if (!account) {
-        return;
+        return [];
     }
-    const nfts = await alchemy.nft.getNftsForOwner(account, {
-        omitMetadata: false
-    });
-    return nfts;
+    const url = `${AlchemyNFTAPI}/getNFTs?owner=${account}&withMetadata=true`;
+    const response = await axios.get(url);
+    // const nfts = await alchemy.nft.getNftsForOwner(account, {
+    //     omitMetadata: false
+    // });
+    return response.data.ownedNfts;
 };
 
 /**

@@ -16,7 +16,7 @@ contract NFTLandCollection is ERC1155, Ownable {
 
     constructor(string memory _baseURI) ERC1155(_baseURI) {
         name = "NFTLandCollection";
-        symbol = "LAND";
+        symbol = "NLC";
     }
 
     modifier onlyMarket() {
