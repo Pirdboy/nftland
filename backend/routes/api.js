@@ -267,7 +267,7 @@ router.get("/getnftsforowner/:account", async (req, res) => {
         allNftsArray.sort((a, b) => {
             return b.timeLastUpdated - a.timeLastUpdated;
         })
-        return res.send(allNftsForOwner);
+        return res.send(allNftsArray);
     } catch (error) {
         console.log(error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
