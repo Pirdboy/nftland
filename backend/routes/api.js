@@ -212,7 +212,7 @@ router.get("/getnftsforowner/:account", async (req, res) => {
                 "tokenId": tokenId,
                 "balance": `${e.owners[account]}`,
                 "metadata": JSON.parse(e.metadata),
-                "metadataUrl": e.metaDataUrl,
+                "metadataUrl": e.metadataUrl,
                 "timeLastUpdated": e.updateAt
             };
         }
