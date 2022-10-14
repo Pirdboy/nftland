@@ -32,7 +32,6 @@ const NFTCard = ({ nft }) => {
 const Profile = () => {
     const { account } = useAccountContext();
     const [nftList, isLoading] = useNFTsForOwner(account);
-    console.log('[debug] nftList', nftList);
     const nftCards = nftList?.map((e, i) =>
         <NFTCard key={i} nft={e} />
     )
