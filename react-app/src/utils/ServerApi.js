@@ -4,9 +4,14 @@ const messageToSign = "This request will not trigger a blockchain transaction or
 
 
 const createNftUrl = {
-    "development": "http://192.168.25.129/api/createnft",
-    "production": "",
+    development: "http://192.168.25.129/api/createnft",
+    production: "",
 };
+
+const getNftsForOwnerUrl = {
+    development:"http://127.0.0.1:3060/api/getnftsforowner/",
+    production:"",
+}
 
 class ServerApi {
     static async CreateNft(name, description, imageFile, totalSupply, signer, account) {
@@ -21,6 +26,12 @@ class ServerApi {
         formData.append("totalSupply", totalSupply);
         formData.append("signature", signature);
         const response = await axios.post(postUrl, formData);
+        return response.data;
+    }
+
+    static async GetNftsForOwner(account) {
+        const url = getNftsForOwnerUrl[process.env.NODE_ENV] + account;
+        const response = await axios.get(url);
         return response.data;
     }
 

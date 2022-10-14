@@ -236,6 +236,12 @@ router.get("/getnftsforowner/:account", async (req, res) => {
             let e = nftsOnChain[i];
             let tokenId = BigNumber.from(e.id.tokenId).toString();
             let k = `${e.contract.address}_${tokenId}`;
+            let metadataUrl = IPFSGatewayURL(e.tokenUri.raw);
+            let metadata = e.metadata;
+            if(!metadata?.name) {
+                const r = await axios.get(metadataUrl);
+                metadata = r.data;
+            }
             allNftsMap[k] = {
                 "contract": {
                     "address": e.contract.address,
