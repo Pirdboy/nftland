@@ -9,11 +9,21 @@ const createNftUrl = {
 };
 
 const getNftsForOwnerUrl = {
-    development:"http://127.0.0.1:3060/api/getnftsforowner/",
+    development:"http://192.168.25.129/api/getnftsforowner/",
     production:"",
 }
 
 class ServerApi {
+    /**
+     * 创建NFT
+     * @param {string} name
+     * @param {string} description
+     * @param {any} imageFile
+     * @param {string} totalSupply
+     * @param {any} signer
+     * @param {string} account
+     * @returns {Promise<{tokenId:string, contractAddress:string}>}
+     */
     static async CreateNft(name, description, imageFile, totalSupply, signer, account) {
         let signature = await signer.signMessage(messageToSign);
         console.log("createnft signature", signature);
@@ -29,9 +39,20 @@ class ServerApi {
         return response.data;
     }
 
+    /**
+     * 获取一个账户的nft列表
+     * @param {string} account
+     * @returns {Promise<Array>}
+     */
     static async GetNftsForOwner(account) {
+        console.log('account',account);
+        if(!account) {
+            return [];
+        }
         const url = getNftsForOwnerUrl[process.env.NODE_ENV] + account;
         const response = await axios.get(url);
+        console.log("[debug] getnfts url", url);
+        console.log("[debug] response data", response.data);
         return response.data;
     }
 

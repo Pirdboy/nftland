@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import ServerApi from "../utils/ServerApi";
+import { IPFSGatewayURL } from "../utils/IPFS";
+const axios = require('axios').default;
 
 function useNFTsForOwner(account) {
     const [nftList, setNFTList] = useState([]);
@@ -10,10 +12,23 @@ function useNFTsForOwner(account) {
             setError(null);
             setLoading(true);
             try {
-                const nfts = ServerApi.GetNftsForOwner(account);
-                if(nfts) {
-                    setNFTList(nfts);
+                let nfts = await ServerApi.GetNftsForOwner(account);
+                let nfts2;
+                if (nfts) {
+                    nfts2 = new Array(nfts.length);
+                    for (let i = 0; i < nfts.length; i++) {
+                        let e = nfts[i];
+                        if(!e.metadata?.name) {
+                            const metadataGateway = IPFSGatewayURL(e.metadataUrl);
+                            const r = await axios.get(metadataGateway);
+                            e.metadata = r.data;
+                        }
+                        nfts2[i] = e;
+                    }
+                } else {
+                    nfts2 = [];
                 }
+                setNFTList(nfts2);
                 setLoading(false);
             } catch (error) {
                 setError(error);
@@ -22,10 +37,10 @@ function useNFTsForOwner(account) {
         };
         f();
     }, [account]);
-    
-    return {
+
+    return [
         nftList, isLoading, error
-    }
+    ]
 }
 
 export default useNFTsForOwner;

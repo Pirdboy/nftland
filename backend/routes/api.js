@@ -197,9 +197,7 @@ router.get("/getnftsforowner/:account", async (req, res) => {
             ]
         }).toArray();
         for (let i = 0; i < nftsInDB.length; i++) {
-            
             let e = nftsInDB[i];
-            console.log(e);
             let tokenId = ObjectIdToTokenId(e._id);
             let k = `${e.contractAddress}_${tokenId}`;
             allNftsMap[k] = {
@@ -216,32 +214,11 @@ router.get("/getnftsforowner/:account", async (req, res) => {
                 "timeLastUpdated": e.updateAt
             };
         }
-        // nftsInDB = nftsInDB.map(e => {
-        //     return {
-        //         "contract": {
-        //             "address": e.contractAddress,
-        //             "name": NFTLandCollectionName,
-        //             "symbol": NFTLandCollectionSymbol
-        //         },
-        //         "tokenType": "ERC1155",
-        //         "tokenId": ObjectIdToTokenId(e._id),
-        //         "balance": `${e.owners[account]}`,
-        //         "metadata": JSON.parse(e.metadata),
-        //         "metadataUrl": e.metaDataUrl,
-        //         "timeLastUpdated": e.updateAt
-        //     }
-        // });
         let nftsOnChain = await GetNFTsForOwner(account);
         for (let i = 0; i < nftsOnChain.length; i++) {
             let e = nftsOnChain[i];
             let tokenId = BigNumber.from(e.id.tokenId).toString();
             let k = `${e.contract.address}_${tokenId}`;
-            let metadataUrl = IPFSGatewayURL(e.tokenUri.raw);
-            let metadata = e.metadata;
-            if(!metadata?.name) {
-                const r = await axios.get(metadataUrl);
-                metadata = r.data;
-            }
             allNftsMap[k] = {
                 "contract": {
                     "address": e.contract.address,
@@ -252,25 +229,10 @@ router.get("/getnftsforowner/:account", async (req, res) => {
                 "tokenId": tokenId,
                 "balance": `${e.balance}`,
                 "metadata": e.metadata,
-                "metadataUrl": IPFSGatewayURL(e.tokenUri.raw),
+                "metadataUrl": e.tokenUri?.raw,
                 "timeLastUpdated": (new Date(e.timeLastUpdated)).getTime(),
             }
         }
-        // nftsOnChain = nftsOnChain.map(e => {
-        //     return {
-        //         "contract": {
-        //             "address": e.contract.address,
-        //             "name": e.contractMetadata.name,
-        //             "symbol": e.contractMetadata.symbol
-        //         },
-        //         "tokenType": e.id.tokenMetadata.tokenType,
-        //         "tokenId": BigNumber.from(e.id.tokenId).toString(),
-        //         "balance": `${e.balance}`,
-        //         "metadata": e.metadata,
-        //         "metadataUrl": IPFSGatewayURL(e.tokenUri.raw),
-        //         "timeLastUpdated": (new Date(e.timeLastUpdated)).getTime(),
-        //     }
-        // });
         let allNftsArray = Object.values(allNftsMap);
         allNftsArray.sort((a, b) => {
             return b.timeLastUpdated - a.timeLastUpdated;
