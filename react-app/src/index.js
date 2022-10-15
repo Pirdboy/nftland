@@ -41,7 +41,7 @@ root.render(
                         <Route path="create" element={<CreateNFT />} />
                         <Route path="mintbird" element={<MintBirdNFT />} />
                         <Route path="profile" element={<Profile />} />
-                        <Route path="nftdetail/:contractdAddr/:tokenId" element={<NFTDetail />}>
+                        <Route path="nftdetail/:contractdAddress/:tokenId" element={<NFTDetail />}>
                         </Route>
                         <Route path="demo" element={<Demo />} />
                     </Route>

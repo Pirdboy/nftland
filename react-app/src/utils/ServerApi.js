@@ -2,16 +2,14 @@ const axios = require('axios').default;
 
 const messageToSign = "This request will not trigger a blockchain transaction or cost any gas fees.\n\nWe need the signature to prove you are the creator";
 
-
-const createNftUrl = {
-    development: "http://192.168.25.129/api/createnft",
+const baseApiUrl = {
+    development: "http://192.168.25.129/api",
     production: "",
-};
-
-const getNftsForOwnerUrl = {
-    development:"http://192.168.25.129/api/getnftsforowner/",
-    production:"",
 }
+const createNftUrl = `${baseApiUrl[process.env.NODE_ENV]}/createnft/`;
+const getNftsForOwnerUrl = `${baseApiUrl[process.env.NODE_ENV]}/getnftsforowner/`;
+const getNftMetadataUrl = `${baseApiUrl[process.env.NODE_ENV]}/getnftmetadata/`;
+const getOwnersForNftUrl = `${baseApiUrl[process.env.NODE_ENV]}/getownersfornft/`;
 
 class ServerApi {
     /**
@@ -49,10 +47,42 @@ class ServerApi {
         if(!account) {
             return [];
         }
-        const url = getNftsForOwnerUrl[process.env.NODE_ENV] + account;
+        const url = getNftsForOwnerUrl+ account;
         const response = await axios.get(url);
         console.log("[debug] getnfts url", url);
-        console.log("[debug] response data", response.data);
+        console.log("[debug] GetNftsForOwner data", response.data);
+        return response.data;
+    }
+
+    /**
+     * 获得nft metadata
+     * @param {string} contractAddress
+     * @param {string} tokenId
+     * @returns {any}
+     */
+    static async GetNftMetadata(contractAddress, tokenId) {
+        if(!contractAddress || !tokenId) {
+            return;
+        }
+        const url = getNftMetadataUrl + contractAddress + "/" + tokenId;
+        const response = await axios.get(url);
+        console.log("[debug] GetNftMetadata data", response.data);
+        return response.data;
+    }
+
+    /**
+     * 获得nft的owner列表
+     * @param {string} contractAddress
+     * @param {string} tokenId
+     * @returns {Promise<[{owner:string,tokenId:string,balance:number}]>}
+     */
+    static async GetOwnersForNft(contractAddress, tokenId) {
+        if(!contractAddress || !tokenId) {
+            return [];
+        }
+        const url = getOwnersForNftUrl + contractAddress + "/" + tokenId;
+        const response = await axios.get(url);
+        console.log("[debug] GetOwnersForNft data", response.data);
         return response.data;
     }
 

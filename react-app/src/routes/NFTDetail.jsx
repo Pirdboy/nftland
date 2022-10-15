@@ -10,16 +10,21 @@ import { useAccountContext } from "../contexts/Account";
 const EtherscanGoerli = "https://goerli.etherscan.io/address/";
 
 const NFTDetail = () => {
-    let { contractdAddr, tokenId } = useParams();
+    let { contractdAddress, tokenId } = useParams();
     const { account } = useAccountContext();
-    const owners = useOwnersForNFT(contractdAddr, tokenId);
-    const ownerText = !account || owners[0]?.toLowerCase() !== account?.toLowerCase() ? owners[0] : "you";
-    const nftMetadata = useNFTMetadata(contractdAddr, tokenId);
-
+    const owners = useOwnersForNFT(contractdAddress, tokenId);
+    const nftMetadata = useNFTMetadata(contractdAddress, tokenId);
     const [imageLoaded, setImageLoaded] = useState(false);
-    if (!contractdAddr || !tokenId) {
+    if (!contractdAddress || !tokenId) {
         return null;
     }
+    let youOwnCount = 0;
+    for(let i=0;i<owners.length;i++) {
+        if(owners[i].owner === account) {
+            youOwnCount = owners[i].balance;
+        }
+    }
+    const ownerText = `${owners.length} owners, you own ${youOwnCount}`;
 
     const onImageLoaded = () => {
         setImageLoaded(true);
@@ -47,7 +52,7 @@ const NFTDetail = () => {
                 <Box h="10px" />
                 <Text fontSize="xl" fontWeight="bold">{nftMetadata?.rawMetadata?.name}</Text>
                 <Text fontSize="lg">{nftMetadata?.rawMetadata?.description}</Text>
-                <Text fontSize="lg">{"owned by "}<Link to={`${EtherscanGoerli + owners[0]}`} color="blue.600">{ownerText}</Link></Text>
+                <Text fontSize="lg">{ownerText}</Text>
                 <Text fontSize='xl' fontWeight="bold">Attributes</Text>
                 {AttributesDisplay}
             </Box>
