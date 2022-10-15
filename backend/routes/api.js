@@ -8,11 +8,9 @@ const fs = require('node:fs/promises');
 const {
     ObjectIdToTokenId,
     TokenIdToObjectId,
-    GetNFTMetadata,
-    GetOwnersForNFT,
     IPFSGatewayURL,
     GetSaleOrderTypedData,
-    GetNFTsForOwner
+    AlchemyAPI,
 } = require('../utils/NFT');
 const { GetMongoCollection, GenerateObjectId } = require('../utils/MongoDB');
 const {
@@ -51,8 +49,8 @@ const nftCreateValidate = (name, description, creator, totalSupply) => {
     }
     return true;
 }
-const nftQueryValidate = (tokenAddress, tokenId) => {
-    if (tokenAddress?.length !== 42) {
+const nftQueryValidate = (contractAddress, tokenId) => {
+    if (contractAddress?.length !== 42) {
         return false;
     }
     if (!tokenId) {
@@ -80,7 +78,7 @@ const saleValidate = (tokenId, tokenAddress, amount, offerer, price) => {
     return true;
 };
 /* test connection */
-router.get('/ping/:a/:b', function (req, res, next) {
+router.get('/ping/:a/:b', function (req, res) {
     let a = req.params.a;
     let b = req.params.b;
     return res.send(`pong a:${a} b:${b}`);
@@ -208,13 +206,13 @@ router.get("/getnftsforowner/:account", async (req, res) => {
                 },
                 "tokenType": "ERC1155",
                 "tokenId": tokenId,
-                "balance": `${e.owners[account]}`,
+                //"balance": `${e.owners[account]}`,
                 "metadata": JSON.parse(e.metadata),
                 "metadataUrl": e.metadataUrl,
                 "timeLastUpdated": e.updateAt
             };
         }
-        let nftsOnChain = await GetNFTsForOwner(account);
+        let nftsOnChain = await AlchemyAPI.GetNFTsForOwner(account);
         for (let i = 0; i < nftsOnChain.length; i++) {
             let e = nftsOnChain[i];
             let tokenId = BigNumber.from(e.id.tokenId).toString();
@@ -227,7 +225,7 @@ router.get("/getnftsforowner/:account", async (req, res) => {
                 },
                 "tokenType": e.id.tokenMetadata.tokenType,
                 "tokenId": tokenId,
-                "balance": `${e.balance}`,
+                //"balance": `${e.balance}`,
                 "metadata": e.metadata,
                 "metadataUrl": e.tokenUri?.raw,
                 "timeLastUpdated": (new Date(e.timeLastUpdated)).getTime(),
@@ -238,6 +236,107 @@ router.get("/getnftsforowner/:account", async (req, res) => {
             return b.timeLastUpdated - a.timeLastUpdated;
         })
         return res.send(allNftsArray);
+    } catch (error) {
+        console.log(error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
+    }
+});
+
+// 获取nft的metadata
+router.get("/getnftmetadata/:contractAddress/:tokenId", async (req, res) => {
+    let { contractAddress, tokenId } = req.params;
+    if (!nftQueryValidate(contractAddress, tokenId)) {
+        return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
+    }
+    try {
+        let nft;
+        if (contractAddress === NFTLandCollectionContractAddress) {
+            const collection = GetMongoCollection('nft');
+            const _id = TokenIdToObjectId(tokenId);
+            const queryResults = await collection.find({
+                $and: [
+                    { _id: _id },
+                    // { 'minted': false },
+                ]
+            }).toArray();
+            if (queryResults?.length <= 0) {
+                throw new Error("nft does not exist offchain");
+            }
+            const e = queryResults[0];
+            nft = {
+                "contract": {
+                    "address": e.contractAddress,
+                    "name": NFTLandCollectionName,
+                    "symbol": NFTLandCollectionSymbol
+                },
+                "tokenType": "ERC1155",
+                "tokenId": tokenId,
+                "metadata": JSON.parse(e.metadata),
+                "metadataUrl": e.metaDataUrl,
+                "minted": e.minted,
+                "timeLastUpdated": e.updateAt
+            };
+        }
+        if(!nft) {
+            const e = await AlchemyAPI.GetNFTMetadata(contractAddress, tokenId);
+            if(!e) {
+                throw new Error("nft does not exist onchain");
+            }
+            nft = {
+                "contract": {
+                    "address": e.contract.address,
+                    "name": e.contractMetadata.name,
+                    "symbol": e.contractMetadata.symbol
+                },
+                "tokenType": e.id.tokenMetadata.tokenType,
+                "tokenId": tokenId,
+                "metadata": e.metadata,
+                "metadataUrl": e.tokenUri?.raw,
+                "minted": true,
+                "timeLastUpdated": (new Date(e.timeLastUpdated)).getTime(),
+            }
+        }
+        return res.send(nft);
+    } catch (error) {
+        console.log(error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
+    }
+});
+
+// 获取nft的owners以及余额
+router.get("/getownersfornft/:contractAddress/:tokenId", async (req, res) => {
+    let { contractAddress, tokenId } = req.params;
+    if(!nftQueryValidate(contractAddress, tokenId)){
+        return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
+    }
+    try {
+        let owners;
+        if(contractAddress === NFTLandCollectionContractAddress) {
+            const collection = GetMongoCollection('nft');
+            const _id = TokenIdToObjectId(tokenId);
+            const queryResults = await collection.find({
+                $and: [
+                    { _id: _id },
+                    { 'minted': false },
+                ]
+            }).toArray();
+            // 如果nft没上链
+            if(queryResults?.length > 0) {
+                const e = queryResults[0];
+                const ownerAddresses = Object.keys(e.owners);
+                owners = ownerAddresses.map((addr) => {
+                    return {
+                        "owner": addr,
+                        "tokenId": tokenId,
+                        "balance": e.owners[addr],
+                    }
+                })
+            }
+        }
+        if(!owners) {
+            owners = await AlchemyAPI.GetOwnersForNFT(contractAddress, tokenId);
+        }
+        return res.send(owners);
     } catch (error) {
         console.log(error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);

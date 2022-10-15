@@ -2,15 +2,77 @@ const axios = require('axios').default;
 const FormData = require('form-data');
 const fs = require('node:fs');
 const path = require('node:path');
-const { ethers } = require('ethers');
+const { ethers, BigNumber } = require('ethers');
 const { ObjectId } = require('mongodb');
 const { url: NFTStorageHTTPAPI, apiKey: NFTStorageAPIKey } = require("../configs").nftstorage;
 const alchemyConfig = require('../configs').alchemy.goerli;
-const { Alchemy } = require("alchemy-sdk");
-const alchemy = new Alchemy(alchemyConfig);
 const gatewayURL = "https://cloudflare-ipfs.com/ipfs/";
 
-const AlchemyNFTAPI = "https://eth-goerli.g.alchemy.com/nft/v2/"+alchemyConfig.apiKey;
+const alchemyNftApiUrl = "https://eth-goerli.g.alchemy.com/nft/v2/" + alchemyConfig.apiKey;
+
+
+class AlchemyAPI {
+    /**
+     * 获取一个账户的所有NFT
+     * @param {string} account
+     */
+    static async GetNFTsForOwner(account) {
+        if (!account) {
+            return [];
+        }
+        const url = `${alchemyNftApiUrl}/getNFTs?owner=${account}&withMetadata=true`;
+        const response = await axios.get(url);
+        return response.data.ownedNfts;
+    }
+
+    /**
+     * 获取某个NFT的metadata
+     * @param {string} tokenAddress
+     * @param {number} tokenId
+     */
+    static async GetNFTMetadata(contractAddress, tokenId) {
+        if (!contractAddress || !tokenId) {
+            return null;
+        }
+        const url = `${alchemyNftApiUrl}/getNFTMetadata?contractAddress=${contractAddress}&tokenId=${tokenId}&refreshCache=false`;
+        const response = await axios.get(url);
+        return response.data;
+    }
+
+    /**
+     * 查看NFT的持有者以及余额
+     * @param {string} contractAddress
+     * @param {string} tokenId
+     */
+    static async GetOwnersForNFT(contractAddress, tokenId) {
+        if (!contractAddress) {
+            return [];
+        }
+        const url = `${alchemyNftApiUrl}/getOwnersForCollection?contractAddress=${contractAddress}&withTokenBalances=true`;
+        const response = await axios.get(url);
+        let { ownerAddresses } = response.data;
+        let ownersForNFT = [];
+        for (let i = 0; i < ownerAddresses.length; i++) {
+            let e = ownerAddresses[i];
+            let balance;
+            for (let j = 0; j < e.tokenBalances.length; j++) {
+                let tokenId2 = BigNumber.from(e.tokenBalances[j].tokenId).toString();
+                if(tokenId2 === tokenId) {
+                    balance = Number(e.tokenBalances[j].balance);
+                    break;
+                }
+            }
+            if(balance) {
+                ownersForNFT.push({
+                    "owner": e.ownerAddress,
+                    "tokenId": tokenId,
+                    "balance": balance
+                });
+            }
+        }
+        return ownersForNFT;
+    }
+}
 
 /**
  * 上传IPFS生成MetadataUri
@@ -66,64 +128,6 @@ const TokenIdToObjectId = (tokenId) => {
     return ObjectId(ethersTokenId.toHexString().slice(2));
 };
 
-/**
- * 获取一个账户的所有NFT
- * @param {string} account
- */
-const GetNFTsForOwner = async (account) => {
-    if (!account) {
-        return [];
-    }
-    const url = `${AlchemyNFTAPI}/getNFTs?owner=${account}&withMetadata=true`;
-    const response = await axios.get(url);
-    // const nfts = await alchemy.nft.getNftsForOwner(account, {
-    //     omitMetadata: false
-    // });
-    return response.data.ownedNfts;
-};
-
-/**
- * 获取NFT合约的meta信息(name, symbol等)
- * @param {string} tokenAddress
- * @returns 
- */
-const GetNFTContractMetadata = async (tokenAddress) => {
-    if (!tokenAddress) {
-        return;
-    }
-    const t = await alchemy.nft.getContractMetadata(tokenAddress);
-    return t;
-}
-
-/**
- * 获取某个NFT的metadata
- * @param {string} tokenAddress
- * @param {number} tokenId
- * @param {string} tokenType
- */
-const GetNFTMetadata = async (tokenAddress, tokenId, tokenType) => {
-    if (!tokenAddress) {
-        return;
-    }
-    const t = await alchemy.nft.getNftMetadata(tokenAddress, tokenId, tokenType);
-    return t.rawMetadata;
-};
-
-
-/**
- * 获取某个NFT的owner
- * @param {string} tokenAddress
- * @param {number} tokenId
- * @returns {Promise<string[]>}
- */
-const GetOwnersForNFT = async (tokenAddress, tokenId) => {
-    if (!tokenAddress) {
-        return;
-    }
-    // ERC-721 NFT的owner只有一个, 但是ERC-1155 NFT的owner可以有多个
-    const t = await alchemy.nft.getOwnersForNft(tokenAddress, tokenId);
-    return t.owners;
-}
 
 
 /**
@@ -179,13 +183,10 @@ const GetSaleOrderTypedData = (tokenId, tokenAddress, amount, offerer, price) =>
 }
 
 module.exports = {
+    AlchemyAPI,
     UploadNFT,
     ObjectIdToTokenId,
     TokenIdToObjectId,
-    GetNFTsForOwner,
-    GetNFTContractMetadata,
-    GetNFTMetadata,
-    GetOwnersForNFT,
     IPFSGatewayURL,
     GetSaleOrderTypedData
 }
