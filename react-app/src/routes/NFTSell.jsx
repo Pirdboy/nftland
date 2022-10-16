@@ -27,7 +27,7 @@ const NFTSell = () => {
     if(!account) {
         return <NotLogin />
     }
-    let youOwnCount = 0;
+    let youOwnCount = 5;
     for (let i = 0; i < owners.length; i++) {
         if (owners[i].owner.toLowerCase() === account?.toLowerCase()) {
             youOwnCount = owners[i].balance;
@@ -43,6 +43,17 @@ const NFTSell = () => {
     }
     const onAmountInputChange = val => {
         setAmount(val);
+        let n = Number(val);
+        if(isNaN(n) || n===0 || n > youOwnCount) {
+            setAmountOk(false);
+        } else {
+            setAmountOk(true);
+        }
+        if(n > youOwnCount) {
+            setErrorMessage("The amount cannot exceed "+youOwnCount);
+        } else {
+            setErrorMessage("");
+        }
     }
     const onPriceInputChange = val => {
         setPrice(val);
