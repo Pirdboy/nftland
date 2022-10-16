@@ -31,7 +31,7 @@ const web3Config = {
     },
 }
 
-function Provider({ children }) {
+function AccountContextProvider({ children }) {
     const { account, chainId, openModal, disconnectModal, provider, signer } = useEthersAppContext();
     const createLoginConnector = useCallback(
         (id) => {
@@ -69,7 +69,7 @@ function Provider({ children }) {
     )
 }
 
-export default Provider;
 export {
+    AccountContextProvider,
     useAccountContext
 }

@@ -1,67 +1,92 @@
-import React, { useState } from "react";
-import { Center, Box, Image, Text, Flex, Link, Skeleton } from "@chakra-ui/react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Center, Box, Image, Text, Flex, Link, LinkBox, LinkOverlay, Skeleton, Button } from "@chakra-ui/react";
+import { useParams, Link as RouterLink } from "react-router-dom";
 import birdImage from "../assets/1.png";
 import { IPFSGatewayURL } from "../utils/IPFS";
 import useNFTMetadata from "../hooks/useNFTMetadata";
 import useOwnersForNFT from "../hooks/useOwnersForNFT";
 import { useAccountContext } from "../contexts/Account";
+import { useNFTDetailContext } from "../contexts/NFTDetailContext";
 
 const EtherscanGoerli = "https://goerli.etherscan.io/address/";
 
-const NFTDetail = () => {
-    let { contractdAddress, tokenId } = useParams();
+const NFTDetail = (props) => {
+    const { contractdAddress, tokenId } = useParams();
     const { account } = useAccountContext();
+    const {setNftContextValue} = useNFTDetailContext();
     const owners = useOwnersForNFT(contractdAddress, tokenId);
     const nftMetadata = useNFTMetadata(contractdAddress, tokenId);
     const [imageLoaded, setImageLoaded] = useState(false);
-    if (!contractdAddress || !tokenId) {
-        return null;
-    }
+
+    console.log("owners", owners);
     let youOwnCount = 0;
-    for(let i=0;i<owners.length;i++) {
-        if(owners[i].owner === account) {
+    for (let i = 0; i < owners?.length; i++) {
+        if (owners[i].owner?.toLowerCase() === account?.toLowerCase()) {
             youOwnCount = owners[i].balance;
         }
     }
-    const ownerText = `${owners.length} owners, you own ${youOwnCount}`;
+    let ownerText = `${owners?.length} owners`;
+    if (youOwnCount > 0) {
+        ownerText += `, you own ${youOwnCount}`;
+    }
 
     const onImageLoaded = () => {
         setImageLoaded(true);
     }
 
-    const AttributesDisplay = (
-        <>
-            {nftMetadata?.rawMetadata?.attributes?.map((e, i) =>
-                <Flex key={i}>
-                    <Text>{e.trait_type + ": "}</Text>
-                    <Box w="20px"></Box>
-                    <Text>{e.value}</Text>
-                </Flex>
-            )}
-        </>
-    );
+    let attributesOrProperties = nftMetadata?.metadata?.attributes;
+    if (!attributesOrProperties) {
+        attributesOrProperties = nftMetadata?.metadata?.properties
+    }
+    let attributesOrPropertiesDisplay = null;
+    if (attributesOrProperties?.length > 0) {
+        attributesOrPropertiesDisplay = attributesOrProperties.map((e, i) => {
+            return <Flex key={i}>
+                <Text>{e.trait_type + ": "}</Text>
+                <Box w="20px"></Box>
+                <Text>{e.value}</Text>
+            </Flex>
+        })
+    }
+
+    useEffect(() => {
+        setNftContextValue({
+            nftMetadata,
+            owners
+        })
+    }, [nftMetadata, owners])
+
+    if (!contractdAddress || !tokenId) {
+        return null;
+    }
 
     return (
-        <Flex p="20px" justify="center">
-            {/* left panel */}
-            <Box w="400px">
-                <Skeleton isLoaded={imageLoaded} w="300px" h="250px">
-                    <Image src={IPFSGatewayURL(nftMetadata?.rawMetadata?.image)} onLoad={onImageLoaded} />
-                </Skeleton>
-                <Box h="10px" />
-                <Text fontSize="xl" fontWeight="bold">{nftMetadata?.rawMetadata?.name}</Text>
-                <Text fontSize="lg">{nftMetadata?.rawMetadata?.description}</Text>
-                <Text fontSize="lg">{ownerText}</Text>
-                <Text fontSize='xl' fontWeight="bold">Attributes</Text>
-                {AttributesDisplay}
-            </Box>
-            <Box w="5px" h="100%" />
-            {/* right panel */}
-            <Box>
-                <Text>{"Right Panel(price, marketplace)"}</Text>
-            </Box>
-        </Flex>
+        <>
+            <Flex p="20px" justify="center">
+                {/* left panel */}
+                <Box w="400px">
+                    <Skeleton isLoaded={imageLoaded} w="380px" h="300px">
+                        <Image src={IPFSGatewayURL(nftMetadata?.metadata?.image)} onLoad={onImageLoaded} />
+                    </Skeleton>
+                    <Box h="10px" />
+                    <Text fontSize="xl" fontWeight="bold">{nftMetadata?.metadata?.name}</Text>
+                    <Text fontSize="lg">{nftMetadata?.metadata?.description}</Text>
+                    <Text fontSize="lg">{ownerText}</Text>
+                    <Text fontSize='xl' fontWeight="bold">Properties</Text>
+                    {attributesOrPropertiesDisplay}
+                </Box>
+                <Box w="5px" h="100%" />
+                {/* right panel */}
+                <Box>
+                    <Text>{"Right Panel(price, marketplace)"}</Text>
+                    <LinkBox>
+                        <LinkOverlay as={RouterLink} to={`/nftsell/${contractdAddress}/${tokenId}`}>
+                            <Button colorScheme="yellow" w="100px" h="40px">Sell</Button>
+                        </LinkOverlay>
+                    </LinkBox>
+                </Box>
+            </Flex>
+        </>
     )
 };
 
