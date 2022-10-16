@@ -13,7 +13,7 @@ const EtherscanGoerli = "https://goerli.etherscan.io/address/";
 const NFTDetail = (props) => {
     const { contractdAddress, tokenId } = useParams();
     const { account } = useAccountContext();
-    const {setNftContextValue} = useNFTDetailContext();
+    const { setNftContextValue } = useNFTDetailContext();
     const owners = useOwnersForNFT(contractdAddress, tokenId);
     const nftMetadata = useNFTMetadata(contractdAddress, tokenId);
     const [imageLoaded, setImageLoaded] = useState(false);
@@ -69,21 +69,27 @@ const NFTDetail = (props) => {
                         <Image src={IPFSGatewayURL(nftMetadata?.metadata?.image)} onLoad={onImageLoaded} />
                     </Skeleton>
                     <Box h="10px" />
-                    <Text fontSize="xl" fontWeight="bold">{nftMetadata?.metadata?.name}</Text>
-                    <Text fontSize="lg">{nftMetadata?.metadata?.description}</Text>
-                    <Text fontSize="lg">{ownerText}</Text>
-                    <Text fontSize='xl' fontWeight="bold">Properties</Text>
+                    <Text fontSize="lg" fontWeight="bold">{nftMetadata?.metadata?.name}</Text>
+                    <Text fontSize="md">{nftMetadata?.metadata?.description}</Text>
+                    <Text fontSize="md">{ownerText}</Text>
+                    <Text fontSize="lg" fontWeight="bold">Properties</Text>
                     {attributesOrPropertiesDisplay}
+                    <Text fontSize="lg" fontWeight="bold">Details</Text>
+                    <Text>{`Contract Address: ${nftMetadata?.contract?.address}`}</Text>
+                    <Text>{`Token ID: ${nftMetadata?.tokenId}`}</Text>
+                    <Text>{`Minted: ${nftMetadata?.minted}`}</Text>
+                    <Text>{`Token Standard: ${nftMetadata?.tokenType}`}</Text>
                 </Box>
                 <Box w="5px" h="100%" />
                 {/* right panel */}
                 <Box>
-                    <Text>{"Right Panel(price, marketplace)"}</Text>
-                    <LinkBox>
-                        <LinkOverlay as={RouterLink} to={`/nftsell/${contractdAddress}/${tokenId}`}>
-                            <Button colorScheme="yellow" w="100px" h="40px">Sell</Button>
-                        </LinkOverlay>
-                    </LinkBox>
+                    {youOwnCount > 0 ?
+                        <LinkBox>
+                            <LinkOverlay as={RouterLink} to={`/nftsell/${contractdAddress}/${tokenId}`}>
+                                <Button colorScheme="yellow" w="100px" h="40px">Sell</Button>
+                            </LinkOverlay>
+                        </LinkBox> : null
+                    }
                 </Box>
             </Flex>
         </>
