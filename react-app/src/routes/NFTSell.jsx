@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Center, Box, Image, Text, Flex, Skeleton, Button, InputGroup, InputRightAddon, useToast } from "@chakra-ui/react";
+import { Center, Box, Image, Text, Flex, Skeleton, Button, InputGroup, InputRightAddon, useToast, Mark } from "@chakra-ui/react";
 import { IPFSGatewayURL } from "../utils/IPFS";
 import { useAccountContext } from "../contexts/Account";
 import { useNFTDetailContext } from "../contexts/NFTDetailContext";
@@ -20,7 +20,6 @@ const NFTSell = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const nftMetadata = nftContextValue?.nftMetadata;
     const owners = nftContextValue?.owners;
-    const nftContractAddress = nftMetadata?.contract?.address;
     const toast = useToast();
     const showErrorToast = (title, errorMessage) => {
         toast({
@@ -76,14 +75,34 @@ const NFTSell = () => {
     }
     const onCompleteListingClick = async e => {
         try {
-            if (nftContractAddress === NFTLandCollectionContractAddress) {
-                const contract = new ethers.Contract(nftContractAddress, [
-                    'function setApprovalForAll(address operator, bool _approved) external'
+            // 1. 如果是外部NFT则需要setApprovalForAll
+            // 先查询approval情况, 如果已经approval了则不需要
+            if (nftMetadata.contract.address !== NFTLandCollectionContractAddress) {
+                const contract = new ethers.Contract(nftMetadata.contract.address, [
+                    'function setApprovalForAll(address operator, bool _approved) external',
+                    'function isApprovedForAll(address owner, address operator) external view returns (bool)'
                 ], signer);
-                const tx = await contract.setApprovalForAll(MarketContractAddress, true);
-                await tx.wait();
+                const isApprovedForAll = await contract.isApprovedForAll(account, MarketContractAddress);
+                if(!isApprovedForAll) {
+                    const tx = await contract.setApprovalForAll(MarketContractAddress, true);
+                    await tx.wait();
+                }
             }
-            
+            // 2. 获取订单数据
+            const priceInEther = ethers.utils.parseEther(price).toString();
+            const sale = await ServerApi.GenerateNftSale(
+                nftMetadata.tokenId,
+                nftMetadata.contract.address,
+                amount,
+                account,
+                priceInEther
+            );
+            // 3. EIP712签名
+            let signature = await signer._signTypedData(sale.domain, sale.types, sale.values);
+            // 4. 提交订单
+            let response = await ServerApi.StoreNftSale(sale, signature, account);
+            console.log("StoreNftSale response:", response);
+            // TODO: 弹出成功的提示框, 然后提供一个链接,跳转到NFTDetail界面
         } catch (error) {
             console.log(error);
             showErrorToast("list nft", error);

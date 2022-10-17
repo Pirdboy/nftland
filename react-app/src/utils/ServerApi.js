@@ -12,6 +12,7 @@ const getNftsForOwnerUrl = `${baseApiUrl[process.env.NODE_ENV]}/getnftsforowner/
 const getNftMetadataUrl = `${baseApiUrl[process.env.NODE_ENV]}/getnftmetadata/`;
 const getOwnersForNftUrl = `${baseApiUrl[process.env.NODE_ENV]}/getownersfornft/`;
 const generateNftSaleUrl = `${baseApiUrl[process.env.NODE_ENV]}/generatenftsale`;
+const storeNftSaleUrl = `${baseApiUrl[process.env.NODE_ENV]}/storenftsale`;
 
 class ServerApi {
     /**
@@ -95,6 +96,7 @@ class ServerApi {
      * @param {string} amount
      * @param {string} offerer
      * @param {string} priceInEther
+     * @return {Promise<{domain, types, values}>}
      */
     static async GenerateNftSale(tokenId, tokenAddress, amount, offerer, priceInEther) {
         if(!tokenId || !tokenAddress) {
@@ -104,6 +106,25 @@ class ServerApi {
         const url = `${generateNftSaleUrl}?tokenId=${tokenId}&tokenAddress=${tokenAddress}&amount=${amount}&offerer=${offerer}&price=${priceInWei}`;
         const response = await axios.get(url);
         console.log("[debug] GenerateSale data", response.data);
+        return response.data;
+    }
+
+    /**
+     * 存储订单信息到后端
+     * @param {any} sale
+     * @param {string} signature
+     * @param {string} signerAddress
+     * @returns {Promise<string>}
+     */
+    static async StoreNftSale(sale, signature, signerAddress) {
+        if(!sale || !signature || !signerAddress) {
+            return;
+        }
+        const response = await axios.post(storeNftSaleUrl, {
+            sale,
+            signature,
+            signerAddress
+        });
         return response.data;
     }
 
