@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios').default;
 const { StatusCodes } = require('http-status-codes');
-const { BigNumber } = require('ethers');
+const { ethers } = require('ethers');
 const path = require('path');
 const fs = require('node:fs/promises');
 const {
@@ -22,8 +22,8 @@ const { marketContract } = require('../utils/Contract');
 const { Signature } = require('../utils/Signature');
 const { staticDir, staticUrl, tempDir } = require("../configs");
 const fileUpload = require('express-fileupload');
-
 const messageToSign = "This request will not trigger a blockchain transaction or cost any gas fees.\n\nWe need the signature to prove you are the creator";
+const numberPattern = /^[0-9]+$/;
 
 const fileUploadMiddleware = () => fileUpload({
     createParentPath: true,
@@ -60,19 +60,20 @@ const nftQueryValidate = (contractAddress, tokenId) => {
 };
 
 const saleValidate = (tokenId, tokenAddress, amount, offerer, price) => {
-    if (typeof tokenId !== 'string' || !tokenId) {
+    if (!tokenId) {
         return false;
     }
-    if (typeof tokenAddress !== 'string' || !tokenAddress) {
+    if (!tokenAddress) {
         return false;
     }
-    if (typeof amount !== 'number' || amount <= 0) {
+    const a = Number(amount);
+    if (isNaN(a) || a <= 0) {
         return false;
     }
-    if (typeof offerer !== 'string' || !offerer) {
+    if (!offerer) {
         return false;
     }
-    if (typeof price !== 'string' || !price) {
+    if (!numberPattern.test(price)) {
         return false;
     }
     return true;
@@ -81,6 +82,12 @@ const saleValidate = (tokenId, tokenAddress, amount, offerer, price) => {
 router.get('/ping/:a/:b', function (req, res) {
     let a = req.params.a;
     let b = req.params.b;
+    return res.send(`pong a:${a} b:${b}`);
+});
+
+/* test query */
+router.get('/ping2', function (req, res) {
+    let {a, b} = req.query;
     return res.send(`pong a:${a} b:${b}`);
 });
 
@@ -215,7 +222,7 @@ router.get("/getnftsforowner/:account", async (req, res) => {
         let nftsOnChain = await AlchemyAPI.GetNFTsForOwner(account);
         for (let i = 0; i < nftsOnChain.length; i++) {
             let e = nftsOnChain[i];
-            let tokenId = BigNumber.from(e.id.tokenId).toString();
+            let tokenId = ethers.BigNumber.from(e.id.tokenId).toString();
             let k = `${e.contract.address}_${tokenId}`;
             allNftsMap[k] = {
                 "contract": {
@@ -343,80 +350,110 @@ router.get("/getownersfornft/:contractAddress/:tokenId", async (req, res) => {
     }
 });
 
-// ----------------- 旧代码 -----------------------
-
-// 查看某个NFT metadata
-// TODO: 不再存储到IPFS上
-router.get('/nft/getNFTMetadata/:tokenAddress/:tokenId', async (req, res) => {
-    let tokenAddress = req.params.tokenAddress;
-    let tokenId = req.params.tokenId;
-    if (!nftQueryValidate(tokenAddress, tokenId)) {
+// 生成订单数据
+router.get('/generatenftsale', async (req, res) => {
+    const {
+        tokenId,
+        tokenAddress,
+        amount,
+        offerer,
+        price
+    } = req.query;
+    if (!saleValidate(tokenId, tokenAddress, amount, offerer, price)) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
     }
     try {
-        let result;
-        if (tokenAddress === NFTLandCollectionContractAddress) {
-            let metadataUrl;
-            try {
-                // metadataUri = await contract.uri(tokenId);  // TODO: 等合约写完再来写这部分
-            } catch (error) {
-                console.log("contract.uri fail", error);
-                metadataUrl = null;
+        const startTime = Date.now();
+        let creator;
+        let tokenType;
+        let minted;
+        if(tokenAddress === NFTLandCollectionContractAddress) {
+            const collection = GetMongoCollection('nft');
+            const _id = TokenIdToObjectId(tokenId);
+            const r = await collection.find({
+                _id: _id
+            }).toArray();
+            if(!r || r.length === 0) {
+                throw new Error('nft not exist');
             }
-            if (!metadataUrl) {
-                const collection = GetMongoCollection('nft');
-                const objectId = TokenIdToObjectId(tokenId);
-                const nfts = await collection.find({ _id: objectId }).toArray();
-                if (!nfts || !Array.isArray(nfts) || nfts.length === 0) {
-                    throw new Error('nonexistent nft');
-                }
-                metadataUrl = nfts[0].metaDataUrl;
-            }
-            metadataUrl = IPFSGatewayURL(metadataUrl);
-            result = await axios.get(metadataUrl);
-            console.log("metadata from url", metadataUrl, result);
+            tokenType = 2;
+            creator = r[0].creator;
+            minted = r[0].minted;
         } else {
-            result = await GetNFTMetadata(tokenAddress, tokenId);
-            console.log("metadata from sdk", result);
+            const e = await AlchemyAPI.GetNFTMetadata(tokenAddress, tokenId);
+            if(!e) {
+                throw new Error("nft does not exist onchain");
+            }
+            // "tokenType": e.id.tokenMetadata.tokenType,
+            const t = e.id.tokenMetadata.tokenType;
+            if(t === 'ERC1155') {
+                tokenType = 2;
+            } else {
+                tokenType = 1;  // 如果tokenType为空,也认为是ERC721
+            }
+            creator = ethers.constants.AddressZero;
+            minted = true;
         }
-        return res.send(result);
+        const data = GetSaleOrderTypedData(
+            tokenId,
+            tokenAddress,
+            amount,
+            offerer,
+            price,
+            startTime,
+            creator,
+            tokenType,
+            minted
+        );
+        return res.send(data);
     } catch (error) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
+        console.log(error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
     }
 });
 
-// 查看某个NFT owner
-router.get('/nft/getOwnersForNFT/:tokenAddress/:tokenId', async (req, res) => {
-    let tokenAddress = req.params.tokenAddress;
-    let tokenId = req.params.tokenId;
-    if (!nftQueryValidate(tokenAddress, tokenId)) {
-        return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
+// 用户上传订单签名
+router.post("/storenftsale", async (req, res) => {
+    const {
+        sale,
+        signature,
+        signerAddress
+    } = req.body;
+    if(!sale || !signature || !signerAddress) {
+        return res.status(StatusCodes.BAD_REQUEST).send('bad request body.');
     }
-    let result;
+    let {domain, types, values: order} = sale;
+    if(!domain || !types || !order) {
+        return res.status(StatusCodes.BAD_REQUEST).send('bad request body.');
+    }
+    if(order.offerer !== signerAddress) {
+        return res.status(StatusCodes.BAD_REQUEST).send('bad request, signerAddress incorrect');
+    }
+    const now = Math.floor(Date.now() / 1000);
+    const timeout = 1200;  // 20 minutes
+    const startTimeInSec = Math.floor(order.startTime / 1000);
+    if(!startTimeInSec || now - startTimeInSec > timeout) {
+        return res.status(StatusCodes.BAD_REQUEST).send('bad request, sale timeout');
+    }
     try {
-        if (tokenAddress === NFTLandCollectionContractAddress) {
-            try {
-                // result = await contract.owners(tokenId); // TODO: 等合约写完再来写这部分
-            } catch (error) {
-                console.log("contract.owners fail", error);
-                result = null;
-            }
-            if (!result) {
-                const collection = GetMongoCollection('nft');
-                const objectId = TokenIdToObjectId(tokenId);
-                const nfts = await collection.find({ _id: objectId }).toArray();
-                if (!nfts || !Array.isArray(nfts) || nfts.length === 0) {
-                    throw new Error('nonexistent nft');
-                }
-                result = [nfts[0].creator];
-            }
-        } else {
-            result = await GetOwnersForNFT(tokenAddress, tokenId);
+        const verifyOk = Signature.VerifyEIP712Signature(domain, types, order, signature, signerAddress);
+        if(!verifyOk) {
+            return res.status(StatusCodes.BAD_REQUEST).send('signature incorrect');
         }
+        const collection = GetMongoCollection('sale_order');
+        await collection.insertOne({
+            ...order,
+            signature
+        });
+        return res.send('success');
     } catch (error) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
     }
 })
+
+// ----------------- 旧代码 -----------------------
+
+// 查看某个NFT metadata
 
 // 生成订单数据
 router.get('/nft/sale/generate', (req, res) => {

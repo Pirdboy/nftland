@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Center, Text, Button, Image, Link, Spinner, useToast } from "@chakra-ui/react";
 import birdImages from "../assets/bird";
 import TimedImage from "../components/TimedImage";
-import { BIRDNFT_ADDRESS } from "../constants/Addresses";
+import { BirdNFTAddress } from "../constants/Addresses";
 import useContractWriter from "../hooks/useContractWriter";
 import BirdNFTABI from "../abis/BirdNFT.json";
 import { ethers } from "ethers";
@@ -11,13 +11,12 @@ import { useAccountContext } from "../contexts/Account";
 import { Link as RouterLink } from 'react-router-dom';
 
 
-// route切换时会恢复到最初状态
 const MintBirdNFT = () => {
     const { account } = useAccountContext();
     const [isMinting, setMinting] = useState(false);
     const [mintedTokenId, setMintedTokenId] = useState(null);
     const toast = useToast();
-    const birdNFTContract = useContractWriter(BirdNFTABI, BIRDNFT_ADDRESS);
+    const birdNFTContract = useContractWriter(BirdNFTABI, BirdNFTAddress);
 
     const MintingSpinner = (
         <Spinner
@@ -101,7 +100,7 @@ const MintBirdNFT = () => {
                     ? null
                     : (
                         <Center>
-                            <Link as={RouterLink} to={`/nftdetail/${BIRDNFT_ADDRESS}/${mintedTokenId}`} fontSize="20px" color="purple.600">View minted NFT detail</Link>
+                            <Link as={RouterLink} to={`/nftdetail/${BirdNFTAddress}/${mintedTokenId}`} fontSize="20px" color="purple.600">View minted NFT detail</Link>
                         </Center>
                     )
             }

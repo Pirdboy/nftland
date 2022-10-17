@@ -16,6 +16,18 @@ struct SaleOrder {
     uint256 startTime;
 }
 
+struct SaleOrderParameters {
+	uint256 tokenId;
+    address tokenAddress;
+    address offerer;
+    uint256 amount;
+    uint256 price;
+    uint256 startTime;  // 毫秒时间戳
+    address creator;  // 如果是外部NFT则没有这个值
+    uint8 tokenType;
+    bool minted;
+}
+
 struct EIP712Domain {
     string name;
     string version;
@@ -42,6 +54,8 @@ contract NFTLandMarket is SignatureVerification, Ownable, ReentrancyGuard, Pause
             "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)"
         );
     bytes32 private immutable DOMAIN_SEPARATOR;
+    uint8 private constant TOKEN_TYPE_ERC721 = 1;
+    uint8 private constant TOKEN_TYPE_ERC1155 = 2;
 
     address private nftlandCollection;
     mapping(bytes => SaleOrderState) private saleOrderState;

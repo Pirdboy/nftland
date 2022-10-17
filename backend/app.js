@@ -27,37 +27,7 @@ app.all('/*', (req, res, next) => {
     res.header("Access-Control-Allow-Methods", "POST, GET");
     res.header("Access-Control-Allow-Headers", "accept, content-type");
     next();
-})
-
-
-// fileUpload
-// app.use(fileUpload({
-//     createParentPath: true,
-//     preserveExtension: true,
-//     safeFileNames: true,
-//     abortOnLimit: true,
-//     useTempFiles: true,
-//     tempFileDir: path.join(__dirname, 'temp'),
-//     debug: true,
-//     uploadTimeout: 45000,
-//     limits: {
-//         fileSize: 10 * 1024 * 1024
-//     }
-// }));
-
-// const fileUploadMiddleware = fileUpload({
-//     createParentPath: true,
-//     preserveExtension: true,
-//     safeFileNames: true,
-//     abortOnLimit: true,
-//     useTempFiles: true,
-//     tempFileDir: path.join(__dirname, 'temp'),
-//     debug: true,
-//     uploadTimeout: 45000,
-//     limits: {
-//         fileSize: 10 * 1024 * 1024
-//     }
-// });
+});
 
 app.use('/api', apiRouter);
 app.use('/apitest', apiTestRouter);

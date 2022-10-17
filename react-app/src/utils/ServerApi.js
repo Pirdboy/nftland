@@ -1,4 +1,5 @@
 const axios = require('axios').default;
+const {ethers} = require('ethers');
 
 const messageToSign = "This request will not trigger a blockchain transaction or cost any gas fees.\n\nWe need the signature to prove you are the creator";
 
@@ -10,6 +11,7 @@ const createNftUrl = `${baseApiUrl[process.env.NODE_ENV]}/createnft/`;
 const getNftsForOwnerUrl = `${baseApiUrl[process.env.NODE_ENV]}/getnftsforowner/`;
 const getNftMetadataUrl = `${baseApiUrl[process.env.NODE_ENV]}/getnftmetadata/`;
 const getOwnersForNftUrl = `${baseApiUrl[process.env.NODE_ENV]}/getownersfornft/`;
+const generateNftSaleUrl = `${baseApiUrl[process.env.NODE_ENV]}/generatenftsale`;
 
 class ServerApi {
     /**
@@ -83,6 +85,25 @@ class ServerApi {
         const url = getOwnersForNftUrl + contractAddress + "/" + tokenId;
         const response = await axios.get(url);
         console.log("[debug] GetOwnersForNft data", response.data);
+        return response.data;
+    }
+
+    /**
+     * 获取订单数据
+     * @param {string} tokenId
+     * @param {string} tokenAddress
+     * @param {string} amount
+     * @param {string} offerer
+     * @param {string} priceInEther
+     */
+    static async GenerateNftSale(tokenId, tokenAddress, amount, offerer, priceInEther) {
+        if(!tokenId || !tokenAddress) {
+            return;
+        }
+        const priceInWei = ethers.utils.parseEther(priceInEther).toString();
+        const url = `${generateNftSaleUrl}?tokenId=${tokenId}&tokenAddress=${tokenAddress}&amount=${amount}&offerer=${offerer}&price=${priceInWei}`;
+        const response = await axios.get(url);
+        console.log("[debug] GenerateSale data", response.data);
         return response.data;
     }
 

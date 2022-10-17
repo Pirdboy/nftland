@@ -1,11 +1,14 @@
 import React, { useState } from "react";
-import { Center, Box, Image, Text, Flex, Skeleton, Button, InputGroup, InputRightAddon } from "@chakra-ui/react";
+import { Center, Box, Image, Text, Flex, Skeleton, Button, InputGroup, InputRightAddon, useToast } from "@chakra-ui/react";
 import { IPFSGatewayURL } from "../utils/IPFS";
 import { useAccountContext } from "../contexts/Account";
 import { useNFTDetailContext } from "../contexts/NFTDetailContext";
 import NotLogin from "../components/NotLogin";
 import NumberInput from "../components/NumberInput";
-import DecimalNumberInput from "../components/DecimalNumberInput"
+import DecimalNumberInput from "../components/DecimalNumberInput";
+import { ethers } from 'ethers';
+import { NFTLandCollectionContractAddress, MarketContractAddress } from "../constants/Addresses";
+import ServerApi from "../utils/ServerApi";
 
 const NFTSell = () => {
     const { account, signer } = useAccountContext();
@@ -15,16 +18,29 @@ const NFTSell = () => {
     const [amountOk, setAmountOk] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const nftMetadata = nftContextValue?.nftMetadata;
+    const owners = nftContextValue?.owners;
+    const nftContractAddress = nftMetadata?.contract?.address;
+    const toast = useToast();
+    const showErrorToast = (title, errorMessage) => {
+        toast({
+            title: title,
+            description: errorMessage,
+            duration: 2000,
+            status: 'error',
+            isClosable: false,
+            position: 'top'
+        })
+    }
 
-    if(!nftContextValue) {
+    if (!nftContextValue) {
         return null;
     }
-    let nftMetadata = nftContextValue?.nftMetadata;
-    let owners = nftContextValue?.owners;
-    if(!nftMetadata|| !owners) {
+
+    if (!nftMetadata || !owners) {
         return null;
     }
-    if(!account) {
+    if (!account) {
         return <NotLogin />
     }
     let youOwnCount = 5;
@@ -33,7 +49,7 @@ const NFTSell = () => {
             youOwnCount = owners[i].balance;
         }
     }
- 
+
     if (youOwnCount === 0) {
         return <Center>not owned by you, you cannot sell</Center>;
     }
@@ -44,13 +60,13 @@ const NFTSell = () => {
     const onAmountInputChange = val => {
         setAmount(val);
         let n = Number(val);
-        if(isNaN(n) || n===0 || n > youOwnCount) {
+        if (isNaN(n) || n === 0 || n > youOwnCount) {
             setAmountOk(false);
         } else {
             setAmountOk(true);
         }
-        if(n > youOwnCount) {
-            setErrorMessage("The amount cannot exceed "+youOwnCount);
+        if (n > youOwnCount) {
+            setErrorMessage("The amount cannot exceed " + youOwnCount);
         } else {
             setErrorMessage("");
         }
@@ -58,8 +74,20 @@ const NFTSell = () => {
     const onPriceInputChange = val => {
         setPrice(val);
     }
-    const onCompleteListingClick = e => {
-        
+    const onCompleteListingClick = async e => {
+        try {
+            if (nftContractAddress === NFTLandCollectionContractAddress) {
+                const contract = new ethers.Contract(nftContractAddress, [
+                    'function setApprovalForAll(address operator, bool _approved) external'
+                ], signer);
+                const tx = await contract.setApprovalForAll(MarketContractAddress, true);
+                await tx.wait();
+            }
+            
+        } catch (error) {
+            console.log(error);
+            showErrorToast("list nft", error);
+        }
     }
 
     return (

@@ -57,12 +57,12 @@ class AlchemyAPI {
             let balance;
             for (let j = 0; j < e.tokenBalances.length; j++) {
                 let tokenId2 = BigNumber.from(e.tokenBalances[j].tokenId).toString();
-                if(tokenId2 === tokenId) {
+                if (tokenId2 === tokenId) {
                     balance = Number(e.tokenBalances[j].balance);
                     break;
                 }
             }
-            if(balance) {
+            if (balance) {
                 ownersForNFT.push({
                     "owner": e.ownerAddress,
                     "tokenId": tokenId,
@@ -139,23 +139,25 @@ function IPFSGatewayURL(ipfsURL) {
     return ipfsURL?.replace("ipfs://", gatewayURL);
 }
 
-
 const saleDomain = {
     name: "nftland",
     version: '1.0',
     chainId: 5,
     verifyingContract: "0x00000000006c3852cbEf3e08E8dF289169EdE581", // 记得替换为market
-    salt: "0xcab6554389422575ff776cbe4c196fff08454285c466423b2f91b6ebfa166ca5", // 一个自己定义的值
+    salt: "0xcab6554389422575ff776cbe4c196fff08454285c466423b2f91b6ebfa166ca5", // 固定值
 };
 
 const saleTypes = {
-    SaleOrder: [
+    SaleOrderParameters: [
         { name: 'tokenId', type: 'uint256' },
         { name: 'tokenAddress', type: 'address' },
-        { name: 'amount', type: 'uint256' },
         { name: 'offerer', type: 'address' },
+        { name: 'amount', type: 'uint256' },
         { name: 'price', type: 'uint256' },
-        { name: "startTime", type: 'uint256' }
+        { name: "startTime", type: 'uint256' },
+        { name: "creator", type: 'address' },
+        { name: 'tokenType', type: 'uint8' },
+        { name: 'minted', type: 'bool' }
     ]
 }
 
@@ -166,18 +168,25 @@ const saleTypes = {
  * @param {number} amount
  * @param {string} offerer
  * @param {string} price
+ * @param {number} startTime
+ * @param {string} creator
+ * @param {number} tokenType
+ * @param {boolean} minted
  */
-const GetSaleOrderTypedData = (tokenId, tokenAddress, amount, offerer, price) => {
+const GetSaleOrderTypedData = (tokenId, tokenAddress, amount, offerer, price, startTime, creator, tokenType, minted) => {
     return {
         domain: saleDomain,
-        type: saleTypes,
+        types: saleTypes,
         values: {
             tokenId,
             tokenAddress,
             amount,
             offerer,
             price,
-            startTime: Math.floor(Date.now() / 1000)
+            startTime,
+            creator,
+            tokenType,
+            minted
         }
     }
 }
