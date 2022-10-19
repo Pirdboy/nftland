@@ -454,7 +454,7 @@ router.post("/storenftsale", async (req, res) => {
 
 router.get("/getnftsalelist", async (req, res) => {
     let { tokenAddress, tokenId } = req.query;
-    if(!nftQueryValidate(contractAddress, tokenId)) {
+    if(!nftQueryValidate(tokenAddress, tokenId)) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
     }
     try {
