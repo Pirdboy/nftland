@@ -19,7 +19,7 @@ import {
     LinkBox,
     LinkOverlay
 } from "@chakra-ui/react";
-import { useParams, Link as RouterLink, useNavigate  } from "react-router-dom";
+import { useParams, Link as RouterLink, useNavigate } from "react-router-dom";
 import { IPFSGatewayURL } from "../utils/IPFS";
 import { useAccountContext } from "../contexts/Account";
 import { useNFTDetailContext } from "../contexts/NFTDetailContext";
@@ -38,6 +38,7 @@ const NFTSell = () => {
     const [amountOk, setAmountOk] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [isListing, setListing] = useState(false);
     const nftMetadata = nftContextValue?.nftMetadata;
     const owners = nftContextValue?.owners;
     const navigate = useNavigate();
@@ -66,11 +67,7 @@ const NFTSell = () => {
                     </ModalBody>
                     <ModalFooter>
                         <Center>
-                            {/* <LinkBox>
-                                <LinkOverlay as={RouterLink} to={`/nftdetail/${nftMetadata?.contract?.address}/${nftMetadata?.tokenId}`}> */}
-                                    <Button colorScheme="blue" w="100px" h="40px" onClick={() => {navigate(`/nftdetail/${nftMetadata?.contract?.address}/${nftMetadata?.tokenId}`)}}>View listing</Button>
-                                {/* </LinkOverlay>
-                            </LinkBox> */}
+                            <Button colorScheme="blue" w="100px" h="40px" onClick={() => { navigate(`/nftdetail/${nftMetadata?.contract?.address}/${nftMetadata?.tokenId}`) }}>View listing</Button>
                         </Center>
                     </ModalFooter>
                 </ModalContent>
@@ -121,6 +118,7 @@ const NFTSell = () => {
     }
     const onCompleteListingClick = async e => {
         try {
+            setListing(true);
             // 1. 如果是外部NFT则需要setApprovalForAll
             // 先查询approval情况, 如果已经approval了则不需要
             if (nftMetadata.contract.address !== NFTLandCollectionContractAddress) {
@@ -135,6 +133,7 @@ const NFTSell = () => {
                 }
             }
             // 2. 获取订单数据
+            console.log("step 2");
             const priceInEther = ethers.utils.parseEther(price).toString();
             const sale = await ServerApi.GenerateNftSale(
                 nftMetadata.tokenId,
@@ -148,9 +147,10 @@ const NFTSell = () => {
             // 4. 提交订单
             let response = await ServerApi.StoreNftSale(sale, signature, account);
             console.log("StoreNftSale response:", response);
-            // TODO: 弹出成功的提示框, 然后提供一个链接,跳转到NFTDetail界面
             setSuccessModalOpen(true);
+            setListing(false);
         } catch (error) {
+            setListing(false);
             console.log(error);
             showErrorToast("list nft", error);
         }
@@ -174,7 +174,7 @@ const NFTSell = () => {
                         <InputRightAddon children="ether" />
                     </InputGroup>
                     <Box h="15px"></Box>
-                    <Button isDisabled={!amountOk} colorScheme="blue" onClick={onCompleteListingClick}>complete listing</Button>
+                    <Button isLoading={isListing} loadingText="submitting" spinnerPlacement="start" isDisabled={!amountOk} colorScheme="blue" onClick={onCompleteListingClick}>complete listing</Button>
                 </Box>
                 <Box w="10px" h="100%" />
                 {/* right panel */}

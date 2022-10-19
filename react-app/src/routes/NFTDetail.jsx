@@ -9,15 +9,26 @@ import {
     LinkBox,
     LinkOverlay,
     Skeleton,
-    Button
+    Button,
+    Table,
+    Thead,
+    Tbody,
+    Tfoot,
+    Tr,
+    Th,
+    Td,
+    TableCaption,
+    TableContainer,
 } from "@chakra-ui/react";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import birdImage from "../assets/1.png";
 import { IPFSGatewayURL } from "../utils/IPFS";
 import useNFTMetadata from "../hooks/useNFTMetadata";
 import useOwnersForNFT from "../hooks/useOwnersForNFT";
+import useNftSaleList from "../hooks/useNftSaleList";
 import { useAccountContext } from "../contexts/Account";
 import { useNFTDetailContext } from "../contexts/NFTDetailContext";
+import { ethers } from "ethers";
 
 const EtherscanGoerli = "https://goerli.etherscan.io/address/";
 
@@ -28,6 +39,7 @@ const NFTDetail = (props) => {
     const owners = useOwnersForNFT(contractdAddress, tokenId);
     const nftMetadata = useNFTMetadata(contractdAddress, tokenId);
     const [imageLoaded, setImageLoaded] = useState(false);
+    const nftSaleList = useNftSaleList(nftMetadata?.tokenId, nftMetadata?.contract?.address);
 
     console.log("owners", owners);
     let youOwnCount = 0;
@@ -45,6 +57,10 @@ const NFTDetail = (props) => {
         setImageLoaded(true);
     }
 
+    const onBuyClicked = async (sale) => {
+        console.log("buy", sale);
+    }
+
     let attributesOrProperties = nftMetadata?.metadata?.attributes;
     if (!attributesOrProperties) {
         attributesOrProperties = nftMetadata?.metadata?.properties
@@ -59,6 +75,29 @@ const NFTDetail = (props) => {
             </Flex>
         })
     }
+
+    let nftSaleListTable = (
+        <TableContainer>
+            <Table variant='simple'>
+                <Thead>
+                    <Tr><Th>Unit Price</Th><Th>Amount</Th><Th>Offerer</Th><Th>&nbsp;</Th></Tr>
+                </Thead>
+                <Tbody>
+                    {nftSaleList.map((e, i) => {
+                        const priceInEth = ethers.utils.formatEther(ethers.BigNumber.from(e.price));
+                        return (
+                            <Tr key={i}>
+                                <Td>{`${priceInEth} ETH`}</Td>
+                                <Td>{e.amount}</Td>
+                                <Td>{e.offerer}</Td>
+                                <Td><Button colorScheme="blue" onClick={() => onBuyClicked(e)}>buy</Button></Td>
+                            </Tr>
+                        )
+                    })}
+                </Tbody>
+            </Table>
+        </TableContainer>
+    )
 
     useEffect(() => {
         setNftContextValue({
@@ -101,6 +140,9 @@ const NFTDetail = (props) => {
                             </LinkOverlay>
                         </LinkBox> : null
                     }
+                    <Text fontSize="xl">Listings</Text>
+                    {/* price, usd price,amount, offerer, button(buy)  */}
+                    {nftSaleListTable}
                 </Box>
             </Flex>
         </>

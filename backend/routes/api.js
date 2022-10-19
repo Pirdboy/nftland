@@ -443,13 +443,32 @@ router.post("/storenftsale", async (req, res) => {
         const collection = GetMongoCollection('sale_order');
         await collection.insertOne({
             ...order,
-            signature
+            signature,
+            status: 1
         });
         return res.send('success');
     } catch (error) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
     }
 })
+
+router.get("/getnftsalelist", async (req, res) => {
+    let { tokenAddress, tokenId } = req.query;
+    if(!nftQueryValidate(contractAddress, tokenId)) {
+        return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
+    }
+    try {
+        const collection = GetMongoCollection('sale_order');
+        const r = await collection.find({
+            tokenId,
+            tokenAddress
+        }).toArray();
+        return res.send(r ?? []);
+    } catch (error) {
+        console.log(error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
+    }
+});
 
 // ----------------- 旧代码 -----------------------
 

@@ -13,6 +13,7 @@ const getNftMetadataUrl = `${baseApiUrl[process.env.NODE_ENV]}/getnftmetadata/`;
 const getOwnersForNftUrl = `${baseApiUrl[process.env.NODE_ENV]}/getownersfornft/`;
 const generateNftSaleUrl = `${baseApiUrl[process.env.NODE_ENV]}/generatenftsale`;
 const storeNftSaleUrl = `${baseApiUrl[process.env.NODE_ENV]}/storenftsale`;
+const getNftSaleListUrl = `${baseApiUrl[process.env.NODE_ENV]}/getnftsalelist`;
 
 class ServerApi {
     /**
@@ -126,6 +127,21 @@ class ServerApi {
             signerAddress
         });
         return response.data;
+    }
+
+    /**
+     * 获取该nft出售列表
+     * @param {string} tokenId
+     * @param {string} tokenAddress
+     * @returns {Promise<[]>}
+     */
+    static async GetNftSaleList(tokenId, tokenAddress) {
+        if(!tokenId || !tokenAddress) {
+            return [];
+        }
+        const url = `${getNftSaleListUrl}?tokenId=${tokenId}&tokenAddress=${tokenAddress}`;
+        const resp = await axios.get(url);
+        return resp.data;
     }
 
     static async TestUpload(imageFile) {
