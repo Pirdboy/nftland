@@ -7,6 +7,7 @@ function useNftSaleList(tokenId, tokenAddress) {
         const f = async () => {
             try {
                 const r = await ServerApi.GetNftSaleList(tokenId, tokenAddress);
+                console.log("getNftSaleList", r);
                 setSaleList(r);
             } catch (error) {
                 console.log("useNftSaleList error",error);

@@ -464,102 +464,10 @@ router.get("/getnftsalelist", async (req, res) => {
             tokenId,
             tokenAddress
         }).toArray();
+        console.log('getnftsalelist', r);
         return res.send(r ?? []);
     } catch (error) {
         console.log(error);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
-    }
-});
-
-// ----------------- 旧代码 -----------------------
-
-// 查看某个NFT metadata
-
-// 生成订单数据
-router.get('/nft/sale/generate', (req, res) => {
-    const {
-        tokenId,
-        tokenAddress,
-        amount,
-        offerer,
-        price
-    } = req.body;
-    if (!saleValidate(tokenId, tokenAddress, amount, offerer, price)) {
-        return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
-    }
-    const data = GetSaleOrderTypedData(tokenId, tokenAddress, amount, offerer, price);
-    return res.send(data);
-});
-
-// 将订单数据存入mongodb
-router.post('/nft/sale/store', async (req, res) => {
-    const {
-        tokenId,
-        tokenAddress,
-        amount,
-        offerer,
-        price,
-        startTime,
-        signature
-    } = req.body;
-    if (!saleValidate(tokenId, tokenAddress, amount, offerer, price)) {
-        return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
-    }
-    if (signature?.length !== 132) {
-        return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
-    }
-    const now = Math.floor(Date.now() / 1000);
-    const timeout = 1200;  // 20 minutes
-    if (!startTime || now - startTime > timeout) {
-        return res.status(StatusCodes.BAD_REQUEST).send('bad request, sale timeout');
-    }
-    try {
-        const collection = GetMongoCollection('sale_order');
-        await collection.insertOne({
-            tokenId,
-            tokenAddress,
-            amount,
-            offerer,
-            price,
-            startTime,
-            signature
-        })
-        return res.send('success');
-    } catch (error) {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
-    }
-});
-
-// 查询nft关联的订单信息
-router.get('/nft/sale/list/:tokenAddress/:tokenId', async (req, res) => {
-    let tokenAddress = req.params.tokenAddress;
-    let tokenId = req.params.tokenId;
-    if (!nftQueryValidate(tokenAddress, tokenId)) {
-        return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
-    }
-    try {
-        const collection = GetMongoCollection('sale_order');
-        let saleOrders = await collection.find({
-            tokenId,
-            tokenAddress
-        }).toArray();
-        if (!saleOrders || !Array.isArray(saleOrders) || saleOrders.length === 0) {
-            saleOrders = [];
-        }
-        // 要借助multicall来优化
-        let result = new Array(saleOrders.length);
-        for (let i = 0; i < saleOrders.length; i++) {
-            let s = saleOrders[i];
-            let { _id, ...fields } = s;
-            let executed = await marketContract.isSaleOrderExecuted(s.signature);
-            result[i] = {
-                _id: s._id.toString(),
-                ...fields,
-                executed
-            }
-        }
-        return res.send(result);
-    } catch (error) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
     }
 });

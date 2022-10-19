@@ -134,15 +134,15 @@ const NFTSell = () => {
             }
             // 2. 获取订单数据
             console.log("step 2");
-            const priceInEther = ethers.utils.parseEther(price).toString();
+            const priceInWei = ethers.utils.parseEther(price).toString();
             console.log('price', price);
-            console.log('priceInEther', priceInEther);
+            console.log('priceInWei', priceInWei);
             const sale = await ServerApi.GenerateNftSale(
                 nftMetadata.tokenId,
                 nftMetadata.contract.address,
                 amount,
                 account,
-                priceInEther
+                priceInWei
             );
             // 3. EIP712签名
             let signature = await signer._signTypedData(sale.domain, sale.types, sale.values);

@@ -96,14 +96,13 @@ class ServerApi {
      * @param {string} tokenAddress
      * @param {string} amount
      * @param {string} offerer
-     * @param {string} priceInEther
+     * @param {string} priceInWei
      * @return {Promise<{domain, types, values}>}
      */
-    static async GenerateNftSale(tokenId, tokenAddress, amount, offerer, priceInEther) {
+    static async GenerateNftSale(tokenId, tokenAddress, amount, offerer, priceInWei) {
         if(!tokenId || !tokenAddress) {
             return;
         }
-        const priceInWei = ethers.utils.parseEther(priceInEther).toString();
         const url = `${generateNftSaleUrl}?tokenId=${tokenId}&tokenAddress=${tokenAddress}&amount=${amount}&offerer=${offerer}&price=${priceInWei}`;
         const response = await axios.get(url);
         console.log("[debug] GenerateSale data", response.data);
@@ -140,7 +139,9 @@ class ServerApi {
             return [];
         }
         const url = `${getNftSaleListUrl}?tokenId=${tokenId}&tokenAddress=${tokenAddress}`;
+        console.log('GetNftSaleList url', url);
         const resp = await axios.get(url);
+        console.log('GetNftSaleList data', resp.data);
         return resp.data;
     }
 
