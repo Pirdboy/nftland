@@ -1,5 +1,25 @@
 import React, { useState } from "react";
-import { Center, Box, Image, Text, Flex, Skeleton, Button, InputGroup, InputRightAddon, useToast, Mark } from "@chakra-ui/react";
+import {
+    Center,
+    Box,
+    Image,
+    Text,
+    Flex,
+    Skeleton,
+    Button,
+    InputGroup,
+    InputRightAddon,
+    useToast,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    LinkBox,
+    LinkOverlay
+} from "@chakra-ui/react";
+import { useParams, Link as RouterLink, useNavigate  } from "react-router-dom";
 import { IPFSGatewayURL } from "../utils/IPFS";
 import { useAccountContext } from "../contexts/Account";
 import { useNFTDetailContext } from "../contexts/NFTDetailContext";
@@ -20,6 +40,7 @@ const NFTSell = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const nftMetadata = nftContextValue?.nftMetadata;
     const owners = nftContextValue?.owners;
+    const navigate = useNavigate();
     const toast = useToast();
     const showErrorToast = (title, errorMessage) => {
         toast({
@@ -31,6 +52,31 @@ const NFTSell = () => {
             position: 'top'
         })
     }
+    const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
+    const NFTSaleCreateSuccessModal = (
+        <>
+            <Modal isOpen={isSuccessModalOpen}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader><Center>{`Your NFT has been listed!`}</Center></ModalHeader>
+                    <ModalBody>
+                        <Center>
+                            <Image w="300px" h="auto" src={IPFSGatewayURL(nftMetadata?.metadata?.image)} />
+                        </Center>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Center>
+                            {/* <LinkBox>
+                                <LinkOverlay as={RouterLink} to={`/nftdetail/${nftMetadata?.contract?.address}/${nftMetadata?.tokenId}`}> */}
+                                    <Button colorScheme="blue" w="100px" h="40px" onClick={() => {navigate(`/nftdetail/${nftMetadata?.contract?.address}/${nftMetadata?.tokenId}`)}}>View listing</Button>
+                                {/* </LinkOverlay>
+                            </LinkBox> */}
+                        </Center>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        </>
+    )
 
     if (!nftContextValue) {
         return null;
@@ -83,7 +129,7 @@ const NFTSell = () => {
                     'function isApprovedForAll(address owner, address operator) external view returns (bool)'
                 ], signer);
                 const isApprovedForAll = await contract.isApprovedForAll(account, MarketContractAddress);
-                if(!isApprovedForAll) {
+                if (!isApprovedForAll) {
                     const tx = await contract.setApprovalForAll(MarketContractAddress, true);
                     await tx.wait();
                 }
@@ -103,6 +149,7 @@ const NFTSell = () => {
             let response = await ServerApi.StoreNftSale(sale, signature, account);
             console.log("StoreNftSale response:", response);
             // TODO: 弹出成功的提示框, 然后提供一个链接,跳转到NFTDetail界面
+            setSuccessModalOpen(true);
         } catch (error) {
             console.log(error);
             showErrorToast("list nft", error);
@@ -138,6 +185,7 @@ const NFTSell = () => {
                     </Skeleton>
                 </Box>
             </Center>
+            {NFTSaleCreateSuccessModal}
         </>
     )
 };

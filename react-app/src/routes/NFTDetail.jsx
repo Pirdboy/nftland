@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Center, Box, Image, Text, Flex, Link, LinkBox, LinkOverlay, Skeleton, Button } from "@chakra-ui/react";
+import {
+    Center,
+    Box,
+    Image,
+    Text,
+    Flex,
+    Link,
+    LinkBox,
+    LinkOverlay,
+    Skeleton,
+    Button
+} from "@chakra-ui/react";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import birdImage from "../assets/1.png";
 import { IPFSGatewayURL } from "../utils/IPFS";
