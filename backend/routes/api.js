@@ -405,6 +405,7 @@ router.get('/generatenftsale', async (req, res) => {
             tokenType,
             minted
         );
+        console.log('generate sale',data);
         return res.send(data);
     } catch (error) {
         console.log(error);

@@ -135,6 +135,8 @@ const NFTSell = () => {
             // 2. 获取订单数据
             console.log("step 2");
             const priceInEther = ethers.utils.parseEther(price).toString();
+            console.log('price', price);
+            console.log('priceInEther', priceInEther);
             const sale = await ServerApi.GenerateNftSale(
                 nftMetadata.tokenId,
                 nftMetadata.contract.address,
