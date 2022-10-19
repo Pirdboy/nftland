@@ -140,7 +140,11 @@ class ServerApi {
         }
         const url = `${getNftSaleListUrl}?tokenId=${tokenId}&tokenAddress=${tokenAddress}`;
         console.log('GetNftSaleList url', url);
-        const resp = await axios.get(url);
+        const resp = await axios.get(url, {
+            headers:{
+                'Cache-Control': 'no-cache'
+            }
+        });
         console.log('GetNftSaleList data', resp.data);
         return resp.data;
     }
