@@ -57,9 +57,12 @@ const NFTDetail = (props) => {
         setImageLoaded(true);
     }
 
-    const onBuyClicked = async (sale) => {
+    const onSaleBuyClicked = async (sale) => {
         console.log("buy", sale);
     }
+    const onSaleCancelClicked = async (sale) => {
+        console.log("cancel", sale);
+    };
 
     let attributesOrProperties = nftMetadata?.metadata?.attributes;
     if (!attributesOrProperties) {
@@ -78,19 +81,27 @@ const NFTDetail = (props) => {
 
     let nftSaleListTable = (
         <TableContainer>
-            <Table variant='simple'>
+            <Table variant='simple' size="sm">
                 <Thead>
                     <Tr><Th>Unit Price</Th><Th>Amount</Th><Th>Offerer</Th><Th>&nbsp;</Th></Tr>
                 </Thead>
                 <Tbody>
                     {nftSaleList.map((e, i) => {
                         const priceInEth = ethers.utils.formatEther(ethers.BigNumber.from(e.price));
+                        let btn;
+                        if (!account) {
+                            btn = null;
+                        } else if (e.offerer.toLowerCase() === account.toLowerCase()) {
+                            btn = <Button colorScheme="blue" onClick={() => onSaleCancelClicked(e)}>Cancel</Button>
+                        } else {
+                            btn = <Button colorScheme="blue" onClick={() => onSaleBuyClicked(e)}>Buy</Button>
+                        }
                         return (
                             <Tr key={i}>
                                 <Td>{`${priceInEth} ETH`}</Td>
                                 <Td>{e.amount}</Td>
                                 <Td>{e.offerer}</Td>
-                                <Td><Button colorScheme="blue" onClick={() => onBuyClicked(e)}>buy</Button></Td>
+                                <Td>{btn}</Td>
                             </Tr>
                         )
                     })}

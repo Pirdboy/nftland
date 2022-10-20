@@ -9,7 +9,6 @@ const {
     ObjectIdToTokenId,
     TokenIdToObjectId,
     IPFSGatewayURL,
-    GetSaleOrderTypedData,
     AlchemyAPI,
 } = require('../utils/NFT');
 const { GetMongoCollection, GenerateObjectId } = require('../utils/MongoDB');
@@ -350,6 +349,29 @@ router.get("/getownersfornft/:contractAddress/:tokenId", async (req, res) => {
     }
 });
 
+const SaleDomain = {
+    name: "nftland",
+    version: '1.0',
+    chainId: 5,
+    verifyingContract: "0x00000000006c3852cbEf3e08E8dF289169EdE581", // 记得替换为market
+    salt: "0xcab6554389422575ff776cbe4c196fff08454285c466423b2f91b6ebfa166ca5", // 固定值
+};
+
+const SaleTypes = {
+    SaleParameters: [
+        { name: 'tokenId', type: 'uint256' },
+        { name: 'tokenAddress', type: 'address' },
+        { name: 'offerer', type: 'address' },
+        { name: 'amount', type: 'uint256' },
+        { name: 'price', type: 'uint256' },
+        { name: "startTime", type: 'uint256' },
+        { name: "creator", type: 'address' },
+        { name: "totalSupply", type: 'uint256' },
+        { name: 'tokenType', type: 'uint8' },
+        { name: 'minted', type: 'bool' }
+    ]
+}
+
 // 生成订单数据
 router.get('/generatenftsale', async (req, res) => {
     const {
@@ -365,6 +387,7 @@ router.get('/generatenftsale', async (req, res) => {
     try {
         const startTime = Date.now();
         let creator;
+        let totalSupply;
         let tokenType;
         let minted;
         if(tokenAddress === NFTLandCollectionContractAddress) {
@@ -378,6 +401,7 @@ router.get('/generatenftsale', async (req, res) => {
             }
             tokenType = 2;
             creator = r[0].creator;
+            totalSupply = r[0].totalSupply;
             minted = r[0].minted;
         } else {
             const e = await AlchemyAPI.GetNFTMetadata(tokenAddress, tokenId);
@@ -392,19 +416,25 @@ router.get('/generatenftsale', async (req, res) => {
                 tokenType = 1;  // 如果tokenType为空,也认为是ERC721
             }
             creator = ethers.constants.AddressZero;
+            totalSupply = 0;
             minted = true;
         }
-        const data = GetSaleOrderTypedData(
-            tokenId,
-            tokenAddress,
-            amount,
-            offerer,
-            price,
-            startTime,
-            creator,
-            tokenType,
-            minted
-        );
+        let data = {
+            domain: SaleDomain,
+            types: SaleTypes,
+            values: {
+                tokenId,
+                tokenAddress,
+                amount,
+                offerer,
+                price,
+                startTime,
+                creator,
+                totalSupply,
+                tokenType,
+                minted
+            }
+        }
         console.log('generate sale',data);
         return res.send(data);
     } catch (error) {

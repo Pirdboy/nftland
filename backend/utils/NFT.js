@@ -139,63 +139,11 @@ function IPFSGatewayURL(ipfsURL) {
     return ipfsURL?.replace("ipfs://", gatewayURL);
 }
 
-const saleDomain = {
-    name: "nftland",
-    version: '1.0',
-    chainId: 5,
-    verifyingContract: "0x00000000006c3852cbEf3e08E8dF289169EdE581", // 记得替换为market
-    salt: "0xcab6554389422575ff776cbe4c196fff08454285c466423b2f91b6ebfa166ca5", // 固定值
-};
-
-const saleTypes = {
-    SaleOrderParameters: [
-        { name: 'tokenId', type: 'uint256' },
-        { name: 'tokenAddress', type: 'address' },
-        { name: 'offerer', type: 'address' },
-        { name: 'amount', type: 'uint256' },
-        { name: 'price', type: 'uint256' },
-        { name: "startTime", type: 'uint256' },
-        { name: "creator", type: 'address' },
-        { name: 'tokenType', type: 'uint8' },
-        { name: 'minted', type: 'bool' }
-    ]
-}
-
-/**
- * 获得Sale订单TypedData
- * @param {string} tokenId
- * @param {string} tokenAddress
- * @param {number} amount
- * @param {string} offerer
- * @param {string} price
- * @param {number} startTime
- * @param {string} creator
- * @param {number} tokenType
- * @param {boolean} minted
- */
-const GetSaleOrderTypedData = (tokenId, tokenAddress, amount, offerer, price, startTime, creator, tokenType, minted) => {
-    return {
-        domain: saleDomain,
-        types: saleTypes,
-        values: {
-            tokenId,
-            tokenAddress,
-            amount,
-            offerer,
-            price,
-            startTime,
-            creator,
-            tokenType,
-            minted
-        }
-    }
-}
 
 module.exports = {
     AlchemyAPI,
     UploadNFT,
     ObjectIdToTokenId,
     TokenIdToObjectId,
-    IPFSGatewayURL,
-    GetSaleOrderTypedData
+    IPFSGatewayURL
 }
