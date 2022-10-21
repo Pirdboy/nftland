@@ -317,7 +317,7 @@ router.get("/getownersfornft/:contractAddress/:tokenId", async (req, res) => {
     }
     try {
         let owners;
-        if(contractAddress === NFTLandCollectionContractAddress) {
+        if(contractAddress.toLowerCase() === NFTLandCollectionContractAddress.toLowerCase()) {
             const collection = GetMongoCollection('nft');
             const _id = TokenIdToObjectId(tokenId);
             const queryResults = await collection.find({
@@ -390,7 +390,7 @@ router.get('/generatenftsale', async (req, res) => {
         let totalSupply;
         let tokenType;
         let minted;
-        if(tokenAddress === NFTLandCollectionContractAddress) {
+        if(tokenAddress.toLowerCase() === NFTLandCollectionContractAddress.toLowerCase()) {
             const collection = GetMongoCollection('nft');
             const _id = TokenIdToObjectId(tokenId);
             const r = await collection.find({
