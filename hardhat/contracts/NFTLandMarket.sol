@@ -170,6 +170,7 @@ contract NFTLandMarket is SignatureVerification, Ownable, ReentrancyGuard, Pause
     }
 
     function setNFTLandCollection(address _addr) external onlyOwner {
+        console.log("setNFTLandCollection", _addr);
         nftlandCollection = _addr;
     }
 

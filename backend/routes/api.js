@@ -256,7 +256,7 @@ router.get("/getnftmetadata/:contractAddress/:tokenId", async (req, res) => {
     }
     try {
         let nft;
-        if (contractAddress === NFTLandCollectionContractAddress) {
+        if (contractAddress.toLowerCase() === NFTLandCollectionContractAddress.toLowerCase()) {
             const collection = GetMongoCollection('nft');
             const _id = TokenIdToObjectId(tokenId);
             const queryResults = await collection.find({
@@ -271,7 +271,7 @@ router.get("/getnftmetadata/:contractAddress/:tokenId", async (req, res) => {
             const e = queryResults[0];
             nft = {
                 "contract": {
-                    "address": e.contractAddress,
+                    "address": NFTLandCollectionContractAddress,
                     "name": NFTLandCollectionName,
                     "symbol": NFTLandCollectionSymbol
                 },
