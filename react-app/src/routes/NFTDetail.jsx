@@ -72,21 +72,27 @@ const NFTDetail = (props) => {
                 NFTLandMarketABI,
                 signer
             );
+            const priceBigNumber = ethers.BigNumber.from(sale.price+'');
+            const amountBigNumber = ethers.BigNumber.from(sale.amount+'');
             let SaleParameters = [
                 ethers.BigNumber.from(sale.tokenId),
                 sale.tokenAddress,
                 sale.offerer,
                 sale.amount,
-                ethers.BigNumber.from(sale.price),
+                priceBigNumber,
                 sale.startTime,
                 sale.creator,
                 sale.totalSupply,
                 sale.tokenType,
                 sale.minted
             ];
+            let payValue = priceBigNumber.mul(amountBigNumber);
             let txResponse = await marketContract.executeSaleOrder(
                 SaleParameters,
-                sale.signature
+                sale.signature,
+                {
+                    value:payValue
+                }
             );
             await txResponse.wait();
             console.log("sale buy success");

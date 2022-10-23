@@ -455,6 +455,7 @@ router.post("/storenftsale", async (req, res) => {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request body.');
     }
     let {domain, types, values: order} = sale;
+    console.log('sale values:', order);
     if(!domain || !types || !order) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request body.');
     }
@@ -475,6 +476,14 @@ router.post("/storenftsale", async (req, res) => {
         const collection = GetMongoCollection('sale_order');
         await collection.insertOne({
             ...order,
+            // tokenId: order.tokenId,
+            // tokenAddress: order.tokenAddress,
+            // amount: Number(order.amount),
+            // offerer: order.offerer,
+            // price: order.price,
+            // startTime: order.startTime,
+            // creator: order.creator,
+            // totalSupply: order.totalSupply,
             signature,
             status: 0
         });
