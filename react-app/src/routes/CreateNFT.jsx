@@ -30,6 +30,7 @@ const CreateNFT = () => {
     const [totalSupply, setTotalSupply] = useState('');
     const [totalSupplyInvalid, setTotalSupplyInvalid] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    console.log("react NODE_ENV", process.env.NODE_ENV);
 
     const showErrorToast = (title, errorMessage) => {
         toast({

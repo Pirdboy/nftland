@@ -40,7 +40,7 @@ const EtherscanGoerli = "https://goerli.etherscan.io/address/";
 
 const NFTDetail = (props) => {
     const { contractdAddress, tokenId } = useParams();
-    const { account } = useAccountContext();
+    const { account, signer } = useAccountContext();
     const { setNftContextValue } = useNFTDetailContext();
     const owners = useOwnersForNFT(contractdAddress, tokenId);
     const nftMetadata = useNFTMetadata(contractdAddress, tokenId);

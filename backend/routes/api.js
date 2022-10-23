@@ -385,6 +385,7 @@ router.get('/generatenftsale', async (req, res) => {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
     }
     try {
+        let amountNum = Number(amount);
         const startTime = Date.now();
         let creator;
         let totalSupply;
@@ -425,7 +426,7 @@ router.get('/generatenftsale', async (req, res) => {
             values: {
                 tokenId,
                 tokenAddress,
-                amount,
+                amount:amountNum,
                 offerer,
                 price,
                 startTime,

@@ -29,7 +29,9 @@ class ServerApi {
     static async CreateNft(name, description, imageFile, totalSupply, signer, account) {
         let signature = await signer.signMessage(messageToSign);
         console.log("createnft signature", signature);
-        const postUrl = createNftUrl[process.env.NODE_ENV];
+        let e = process.env.NODE_ENV;
+        console.log('e',e);
+        const postUrl = createNftUrl;
         let formData = new FormData();
         formData.append("name", name);
         formData.append("description", description);
@@ -37,6 +39,7 @@ class ServerApi {
         formData.append("creator", account);
         formData.append("totalSupply", totalSupply);
         formData.append("signature", signature);
+        console.log('postUrl', postUrl);
         const response = await axios.post(postUrl, formData);
         return response.data;
     }
