@@ -39,6 +39,7 @@ server.on('error', onError);
 server.on('listening', onListening);
 
 const onProcessExit = async (signal) => {
+    console.log('process exist signal', signal);
     server.close(async () => {
         EthereumEventListenOff();
         console.log('server close');
