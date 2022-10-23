@@ -27,7 +27,7 @@ import NotLogin from "../components/NotLogin";
 import NumberInput from "../components/NumberInput";
 import DecimalNumberInput from "../components/DecimalNumberInput";
 import { ethers } from 'ethers';
-import { NFTLandCollectionContractAddress, MarketContractAddress } from "../constants/Addresses";
+import { NFTLandCollectionContractAddress, NFTLandMarketContractAddress } from "../constants/Addresses";
 import ServerApi from "../utils/ServerApi";
 
 const NFTSell = () => {
@@ -126,9 +126,9 @@ const NFTSell = () => {
                     'function setApprovalForAll(address operator, bool _approved) external',
                     'function isApprovedForAll(address owner, address operator) external view returns (bool)'
                 ], signer);
-                const isApprovedForAll = await contract.isApprovedForAll(account, MarketContractAddress);
+                const isApprovedForAll = await contract.isApprovedForAll(account, NFTLandMarketContractAddress);
                 if (!isApprovedForAll) {
-                    const tx = await contract.setApprovalForAll(MarketContractAddress, true);
+                    const tx = await contract.setApprovalForAll(NFTLandMarketContractAddress, true);
                     await tx.wait();
                 }
             }

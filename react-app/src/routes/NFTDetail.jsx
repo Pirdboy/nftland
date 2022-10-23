@@ -29,7 +29,12 @@ import useNftSaleList from "../hooks/useNftSaleList";
 import { useAccountContext } from "../contexts/Account";
 import { useNFTDetailContext } from "../contexts/NFTDetailContext";
 import { ethers } from "ethers";
-import { NFTLandCollectionContractAddress, MarketContractAddress } from "../constants/Addresses";
+import {
+    NFTLandCollectionContractAddress,
+    NFTLandMarketContractAddress
+} from "../constants/Addresses";
+import NFTLandMarketABI from "../abis/NFTLandMarket.json";
+import NFTLandCollectionABI from "../abis/NFTLandCollection.json";
 
 const EtherscanGoerli = "https://goerli.etherscan.io/address/";
 
@@ -60,9 +65,64 @@ const NFTDetail = (props) => {
 
     const onSaleBuyClicked = async (sale) => {
         console.log("buy", sale);
+        try {
+            console.log('sale buy', sale);
+            const marketContract = new ethers.Contract(
+                NFTLandMarketContractAddress,
+                NFTLandMarketABI,
+                signer
+            );
+            let SaleParameters = [
+                ethers.BigNumber.from(sale.tokenId),
+                sale.tokenAddress,
+                sale.offerer,
+                sale.amount,
+                ethers.BigNumber.from(sale.price),
+                sale.startTime,
+                sale.creator,
+                sale.totalSupply,
+                sale.tokenType,
+                sale.minted
+            ];
+            let txResponse = await marketContract.executeSaleOrder(
+                SaleParameters,
+                sale.signature
+            );
+            await txResponse.wait();
+            console.log("sale buy success");
+        } catch (error) {
+            console.log('sale buy error', error);
+        }
     }
     const onSaleCancelClicked = async (sale) => {
-        console.log("cancel", sale);
+        try {
+            console.log("sale cancel", sale);
+            const marketContract = new ethers.Contract(
+                NFTLandMarketContractAddress,
+                NFTLandMarketABI,
+                signer
+            );
+            let SaleParameters = [
+                ethers.BigNumber.from(sale.tokenId),
+                sale.tokenAddress,
+                sale.offerer,
+                sale.amount,
+                ethers.BigNumber.from(sale.price),
+                sale.startTime,
+                sale.creator,
+                sale.totalSupply,
+                sale.tokenType,
+                sale.minted
+            ];
+            let txResponse = await marketContract.cancelSale(
+                SaleParameters,
+                sale.signature
+            );
+            await txResponse.wait();
+            console.log("sale cancel success");
+        } catch (error) {
+            console.log("sale cancel error", error);
+        }
     };
 
     let attributesOrProperties = nftMetadata?.metadata?.attributes;
