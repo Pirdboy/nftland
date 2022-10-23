@@ -41,11 +41,18 @@ server.on('listening', onListening);
 const onProcessExit = async (signal) => {
     console.log('process exist signal', signal);
     server.close(async () => {
-        EthereumEventListenOff();
-        console.log('server close');
-        await mongodbClient.close();
-        console.log('mongoclient close');
-        console.log("exit");
+        try {
+            EthereumEventListenOff();
+            console.log('server close');
+            await mongodbClient.close();
+            console.log('mongoclient close');
+            console.log("exit");
+            process.exit(0);
+        } catch (error) {
+            console.log("process exit error", error);
+            process.exit(1);
+        }
+
     })
 };
 
