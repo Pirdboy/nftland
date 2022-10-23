@@ -475,7 +475,7 @@ router.post("/storenftsale", async (req, res) => {
         await collection.insertOne({
             ...order,
             signature,
-            status: 1
+            status: 0
         });
         return res.send('success');
     } catch (error) {

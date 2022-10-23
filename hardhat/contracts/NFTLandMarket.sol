@@ -54,9 +54,9 @@ contract NFTLandMarket is SignatureVerification, Ownable, ReentrancyGuard, Pause
     address private nftlandCollection;
     mapping(bytes => SaleState) private saleStateMap;
 
-    event SaleExecuted(bytes indexed signature, address indexed buyer);
+    event SaleExecuted(bytes signature, address offerer, address buyer);
 
-    event SaleCanceled(bytes indexed signature);
+    event SaleCanceled(bytes signature);
 
     constructor() {
         DOMAIN_SEPARATOR = keccak256(
@@ -139,7 +139,7 @@ contract NFTLandMarket is SignatureVerification, Ownable, ReentrancyGuard, Pause
 
         // 3. 记录sale状态, 触发事件
         saleStateMap[_signature] = SaleState.Executed;
-        emit SaleExecuted(_signature, msg.sender);
+        emit SaleExecuted(_signature, offerer, msg.sender);
     }
 
     function getSaleTypedDataHash(SaleParameters memory _sale) private view returns (bytes32) {

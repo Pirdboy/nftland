@@ -29,6 +29,7 @@ import useNftSaleList from "../hooks/useNftSaleList";
 import { useAccountContext } from "../contexts/Account";
 import { useNFTDetailContext } from "../contexts/NFTDetailContext";
 import { ethers } from "ethers";
+import { NFTLandCollectionContractAddress, MarketContractAddress } from "../constants/Addresses";
 
 const EtherscanGoerli = "https://goerli.etherscan.io/address/";
 

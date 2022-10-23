@@ -9,6 +9,11 @@ var debug = require('debug')('nftland-backend-node:server');
 var http = require('http');
 const process = require('node:process');
 const mongodbClient = require('../utils/MongoDB').GetMongoClient();
+const {
+    EthereumEventListenOn,
+    EthereumEventListenOff
+} = require('../utils/EthereumEvent');
+
 
 /**
  * Get port from environment and store in Express.
@@ -18,6 +23,8 @@ var port = normalizePort(process.env.PORT || '3060');
 app.set('port', port);
 
 console.log("NODE_ENV", process.env.NODE_ENV);
+
+EthereumEventListenOn();
 
 /**
  * Create HTTP server.
@@ -35,6 +42,7 @@ server.on('listening', onListening);
 
 const onProcessExit = async (signal) => {
     server.close(async () => {
+        EthereumEventListenOff();
         console.log('server close');
         await mongodbClient.close();
         console.log('mongoclient close');

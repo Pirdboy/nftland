@@ -16,6 +16,8 @@ contract NFTLandCollection is ERC1155, Ownable {
     mapping(uint => uint) totalSupply; // tokenId => amount
     address private market;
 
+    event Mint(address creator, uint256 tokenId, uint256 amount);
+
     constructor(string memory _baseURI) ERC1155(_baseURI) {
         name = "NFTLandCollection";
         symbol = "NLC";
@@ -35,6 +37,7 @@ contract NFTLandCollection is ERC1155, Ownable {
         require(!exist(_id), "this token has been minted");
         _mint(_creator, _id, _amount, "");
         totalSupply[_id] = _amount;
+        emit Mint(_creator, _id, _amount);
     }
 
     function uri(uint256 _tokenId) public view override returns (string memory) {

@@ -113,6 +113,9 @@ const UploadNFT = async (name, description, imagePath) => {
  * @returns {string}
  */
 const ObjectIdToTokenId = (objectId) => {
+    if(!objectId) {
+        return null;
+    }
     const tokenId = ethers.BigNumber.from(`0x${objectId.toHexString()}`);
     return tokenId.toString();
 }
@@ -124,6 +127,9 @@ const ObjectIdToTokenId = (objectId) => {
  * @returns {ObjectId}
  */
 const TokenIdToObjectId = (tokenId) => {
+    if(!tokenId) {
+        return null;
+    }
     const ethersTokenId = ethers.BigNumber.from(tokenId);
     return ObjectId(ethersTokenId.toHexString().slice(2));
 };
