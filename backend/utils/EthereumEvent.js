@@ -45,19 +45,19 @@ const EthereumEventListenOn = () => {
             console.log('event Mint error',error);
         }
     });
-    nftMarketContract.on('SaleExecuted', async (signature, offerer, buyer) => {
+    nftMarketContract.on('SaleExecuted', async (_signature, _offerer, _buyer) => {
+        console.log(`event SaleExecuted |signature:${_signature} |offerer:${_offerer} |buyer:${_buyer}`);
         try {
-            console.log(`event SaleExecuted |signature:${signature} |offerer:${offerer} |buyer:${buyer}`);
             const now = Data.now();
             const saleCollection = GetMongoCollection('sale_order');
             await saleCollection.updateOne(
-                { signature: signature },
+                { signature: _signature },
                 {
-                    $set: { 'buyer': buyer, 'status': 2, 'finishedTime': now }
+                    $set: { 'buyer': _buyer, 'status': 2, 'finishedTime': now }
                 }
             )
             let results = await saleCollection.find({
-                signature: signature
+                signature: _signature
             }).toArray();
             if (!results || results.length === 0) {
                 console.log("no results find");
@@ -68,7 +68,7 @@ const EthereumEventListenOn = () => {
                 let incAmount = Number(amount);
                 let decAmount = -Number(amount);
                 const offererKey = `owners.${offerer}`;
-                const buyerKey = `owners.${buyer}`;
+                const buyerKey = `owners.${_buyer}`;
                 const nftCollection = GetMongoCollection('nft');
                 let _id = TokenIdToObjectId(tokenId);
                 await nftCollection.updateOne(
