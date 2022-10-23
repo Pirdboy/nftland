@@ -4,14 +4,18 @@ const NFTLandMarketABI = require('./abis/NFTLandMarket.json');
 const {
     NFTLandCollectionContractAddress,
     NFTLandMarketContractAddress
-} = require('../constants');
+} = require('../constants/index');
 const { httpApiKey } = require('../configs').alchemy.goerli;
 const { GetMongoCollection } = require('./MongoDB');
 const {
     ObjectIdToTokenId,
     TokenIdToObjectId
 } = require('./NFT');
+console.log('???????????????????????????????');
 
+console.log('HttpApiKey',httpApiKey);
+console.log('address 1',NFTLandCollectionContractAddress);
+console.log('address 2',NFTLandMarketContractAddress);
 const ethersProvider = new ethers.providers.StaticJsonRpcProvider(httpApiKey);
 
 const nftlandCollectionContract = new ethers.Contract(
@@ -27,6 +31,7 @@ const nftMarketContract = new ethers.Contract(
 );
 
 const EthereumEventListenOn = () => {
+    console.log('EthereumEventListenOn');
     nftlandCollectionContract.on('Mint', async (creator, tokenId, amount) => {
         try {
             console.log(`event Mint |creator:${creator} |tokenId:${tokenId} |amount:${amount}`);

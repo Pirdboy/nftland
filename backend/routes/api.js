@@ -14,10 +14,10 @@ const {
 const { GetMongoCollection, GenerateObjectId } = require('../utils/MongoDB');
 const {
     NFTLandCollectionContractAddress,
+    NFTLandMarketContractAddress,
     NFTLandCollectionName,
     NFTLandCollectionSymbol
 } = require('../constants');
-const { marketContract } = require('../utils/Contract');
 const { Signature } = require('../utils/Signature');
 const { staticDir, staticUrl, tempDir } = require("../configs");
 const fileUpload = require('express-fileupload');
@@ -353,7 +353,7 @@ const SaleDomain = {
     name: "nftland",
     version: '1.0',
     chainId: 5,
-    verifyingContract: "0x00000000006c3852cbEf3e08E8dF289169EdE581", // 记得替换为market
+    verifyingContract: NFTLandMarketContractAddress, // 记得替换为market
     salt: "0xcab6554389422575ff776cbe4c196fff08454285c466423b2f91b6ebfa166ca5", // 固定值
 };
 
