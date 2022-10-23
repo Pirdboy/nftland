@@ -11,11 +11,7 @@ const {
     ObjectIdToTokenId,
     TokenIdToObjectId
 } = require('./NFT');
-console.log('???????????????????????????????');
 
-console.log('HttpApiKey',httpApiKey);
-console.log('address 1',NFTLandCollectionContractAddress);
-console.log('address 2',NFTLandMarketContractAddress);
 const ethersProvider = new ethers.providers.StaticJsonRpcProvider(httpApiKey);
 
 const nftlandCollectionContract = new ethers.Contract(

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -62,7 +61,6 @@ contract NFTLandCollection is ERC1155, Ownable {
     }
 
     function setMarket(address _market) external onlyOwner {
-        console.log("setMarket", _market);
         market = _market;
     }
 }

@@ -27,7 +27,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "bytes",
                 "name": "signature",
                 "type": "bytes"
@@ -40,13 +40,19 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "bytes",
                 "name": "signature",
                 "type": "bytes"
             },
             {
-                "indexed": true,
+                "indexed": false,
+                "internalType": "address",
+                "name": "offerer",
+                "type": "address"
+            },
+            {
+                "indexed": false,
                 "internalType": "address",
                 "name": "buyer",
                 "type": "address"
