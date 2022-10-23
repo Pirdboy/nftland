@@ -221,20 +221,20 @@ router.get("/getnftsforowner/:account", async (req, res) => {
         let nftsOnChain = await AlchemyAPI.GetNFTsForOwner(account);
         for (let i = 0; i < nftsOnChain.length; i++) {
             let e = nftsOnChain[i];
-            let tokenId = ethers.BigNumber.from(e.id.tokenId).toString();
-            let k = `${e.contract.address}_${tokenId}`;
+            let tokenId = ethers.BigNumber.from(e?.id?.tokenId).toString();
+            let k = `${e?.contract?.address}_${tokenId}`;
             allNftsMap[k] = {
                 "contract": {
-                    "address": e.contract.address,
-                    "name": e.contractMetadata.name,
-                    "symbol": e.contractMetadata.symbol
+                    "address": e?.contract?.address,
+                    "name": e?.contractMetadata?.name,
+                    "symbol": e?.contractMetadata?.symbol
                 },
-                "tokenType": e.id.tokenMetadata.tokenType,
+                "tokenType": e?.id?.tokenMetadata.tokenType,
                 "tokenId": tokenId,
                 //"balance": `${e.balance}`,
-                "metadata": e.metadata,
-                "metadataUrl": e.tokenUri?.raw,
-                "timeLastUpdated": (new Date(e.timeLastUpdated)).getTime(),
+                "metadata": e?.metadata,
+                "metadataUrl": e?.tokenUri?.raw,
+                "timeLastUpdated": (new Date(e?.timeLastUpdated)).getTime(),
             }
         }
         let allNftsArray = Object.values(allNftsMap);
