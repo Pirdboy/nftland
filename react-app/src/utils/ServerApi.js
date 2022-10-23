@@ -55,7 +55,11 @@ class ServerApi {
             return [];
         }
         const url = getNftsForOwnerUrl+ account;
-        const response = await axios.get(url);
+        const response = await axios.get(url,{
+            headers:{
+                'Cache-Control': 'no-cache'
+            }
+        });
         console.log("[debug] getnfts url", url);
         console.log("[debug] GetNftsForOwner data", response.data);
         return response.data;
@@ -88,7 +92,11 @@ class ServerApi {
             return [];
         }
         const url = getOwnersForNftUrl + contractAddress + "/" + tokenId;
-        const response = await axios.get(url);
+        const response = await axios.get(url,{
+            headers:{
+                'Cache-Control': 'no-cache'
+            }
+        });
         console.log("[debug] GetOwnersForNft data", response.data);
         return response.data;
     }
@@ -107,7 +115,11 @@ class ServerApi {
             return;
         }
         const url = `${generateNftSaleUrl}?tokenId=${tokenId}&tokenAddress=${tokenAddress}&amount=${amount}&offerer=${offerer}&price=${priceInWei}`;
-        const response = await axios.get(url);
+        const response = await axios.get(url,{
+            headers:{
+                'Cache-Control': 'no-cache'
+            }
+        });
         console.log("[debug] GenerateSale data", response.data);
         return response.data;
     }
