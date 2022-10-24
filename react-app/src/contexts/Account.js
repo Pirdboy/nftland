@@ -1,38 +1,39 @@
 import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import { useEthersAppContext, EthersModalConnector } from 'eth-hooks/context';
-import WalletConnectProvider from "@walletconnect/web3-provider";
-import { ethers } from 'ethers';
+// import WalletConnectProvider from "@walletconnect/web3-provider";
+// import { ethers } from 'ethers';
 
 const AccountContext = createContext();
 
 
 /**
  * useAccountContext
- * @returns {{account,chainId,connect,disconnect,provider,signer:ethers.Signer}}
+ * @returns {{account,chainId,connect,disconnect,provider,signer:ethers.Signer,connector,active}}
  */
 function useAccountContext() {
     return useContext(AccountContext);
 }
 
 const web3Config = {
+    // network: "goerli",
     cacheProvider: true,
     providerOptions: {
-        walletconnect: {
-            package: WalletConnectProvider, // required
-            options: {
-                rpc: {
-                    // 1: "https://eth-mainnet.g.alchemy.com/v2/3Fwz5Vj7T37o7cHOowrarmQHRwrn3uwR",
-                    4: "https://eth-rinkeby.alchemyapi.io/v2/R66GEbPxA6Ag0sLT1bpOaOTRxKu4yWZp",
-                    5: "https://eth-goerli.g.alchemy.com/v2/8nBorYC3l1xHmEqeCyY4ewavD0PIkkKF",
-                    // 31337: "http://127.0.0.1:8545",
-                }
-            },
-        },
+        // walletconnect: {
+        //     package: WalletConnectProvider, // required
+        //     options: {
+        //         rpc: {
+        //             // 1: "https://eth-mainnet.g.alchemy.com/v2/3Fwz5Vj7T37o7cHOowrarmQHRwrn3uwR",
+        //             4: "https://eth-rinkeby.alchemyapi.io/v2/R66GEbPxA6Ag0sLT1bpOaOTRxKu4yWZp",
+        //             5: "https://eth-goerli.g.alchemy.com/v2/8nBorYC3l1xHmEqeCyY4ewavD0PIkkKF",
+        //             // 31337: "http://127.0.0.1:8545",
+        //         }
+        //     },
+        // },
     },
 }
 
 function AccountContextProvider({ children }) {
-    const { account, chainId, openModal, disconnectModal, provider, signer } = useEthersAppContext();
+    const { account, chainId, openModal, disconnectModal, provider, signer, connector, active } = useEthersAppContext();
     const createLoginConnector = useCallback(
         (id) => {
             if (web3Config) {
@@ -60,7 +61,9 @@ function AccountContextProvider({ children }) {
         disconnect,
         provider,
         signer,
-    }), [connect, disconnect, account, chainId, provider, signer]);
+        connector,
+        active
+    }), [connect, disconnect, account, chainId, provider, signer, connector, active]);
 
     return (
         <AccountContext.Provider value={contextValue}>
