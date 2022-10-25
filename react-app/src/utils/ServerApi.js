@@ -76,7 +76,11 @@ class ServerApi {
             return;
         }
         const url = getNftMetadataUrl + contractAddress + "/" + tokenId;
-        const response = await axios.get(url);
+        const response = await axios.get(url,{
+            headers:{
+                'Cache-Control': 'no-cache'
+            }
+        });
         console.log("[debug] GetNftMetadata data", response.data);
         return response.data;
     }
