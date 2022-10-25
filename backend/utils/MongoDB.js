@@ -34,17 +34,18 @@ function GetMongoCollection(name) {
     return nftlandDB.collection(name);
 }
 
-const MongoInt64 = (num) => {
+const MongoUInt64 = (num) => {
     return Long.fromNumber(num, true);
 }
 
-const n = MongoInt64(Date.now());
-console.log('MongoInt64结果',n.toString());
-
+const MongoInt64 = (num) => {
+    return Long.fromNumber(num, false);
+}
 
 module.exports = {
     GetMongoClient,
     GetMongoCollection,
     GenerateObjectId,
+    MongoUInt64,
     MongoInt64
 }
