@@ -1,3 +1,4 @@
+require('../utils/ArrayUtil');
 const express = require('express');
 const router = express.Router();
 const axios = require('axios').default;
@@ -507,6 +508,19 @@ router.get("/getnftsalelist", async (req, res) => {
         }).sort({ startTime: -1 }).toArray();
         console.log('getnftsalelist', r);
         return res.send(r ?? []);
+    } catch (error) {
+        console.log(error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
+    }
+});
+
+router.get("/topsalelist", async (req, res) => {
+    try {
+        const collection = GetMongoCollection('sale_order');
+        const results = await collection.find({}).project({tokenId:1, tokenAddress:1, _id:0}).toArray();
+        console.log("results",results);
+        const distinctResults = results.distinct(e => `${e.tokenAddress}_${e.tokenId}`);
+        return res.send(distinctResults);
     } catch (error) {
         console.log(error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
