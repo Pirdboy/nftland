@@ -518,8 +518,8 @@ router.get("/topsalelist", async (req, res) => {
     try {
         const collection = GetMongoCollection('sale_order');
         const results = await collection.find({}).project({tokenId:1, tokenAddress:1, _id:0}).toArray();
-        console.log("results",results);
         const distinctResults = results.distinct(e => `${e.tokenAddress}_${e.tokenId}`);
+        console.log("topsalelist",results);
         return res.send(distinctResults);
     } catch (error) {
         console.log(error);

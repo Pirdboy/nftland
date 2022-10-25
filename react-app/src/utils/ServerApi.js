@@ -14,6 +14,7 @@ const getOwnersForNftUrl = `${baseApiUrl[process.env.NODE_ENV]}/getownersfornft/
 const generateNftSaleUrl = `${baseApiUrl[process.env.NODE_ENV]}/generatenftsale`;
 const storeNftSaleUrl = `${baseApiUrl[process.env.NODE_ENV]}/storenftsale`;
 const getNftSaleListUrl = `${baseApiUrl[process.env.NODE_ENV]}/getnftsalelist`;
+const topSaleListUrl = `${baseApiUrl[process.env.NODE_ENV]}/topsalelist`;
 
 class ServerApi {
     /**
@@ -165,6 +166,15 @@ class ServerApi {
             }
         });
         console.log('GetNftSaleList data', resp.data);
+        return resp.data;
+    }
+
+    static async GetTopSaleList() {
+        const resp = await axios.get(topSaleListUrl, {
+            headers:{
+                'Cache-Control': 'no-cache'
+            }
+        });
         return resp.data;
     }
 
