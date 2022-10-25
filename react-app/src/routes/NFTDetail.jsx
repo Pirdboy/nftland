@@ -58,27 +58,9 @@ const SpinnerModal = ({ children, isOpen }) => {
     )
 };
 
-
-// const NFTSaleCreateSuccessModal = (
-//     <>
-//         <Modal isOpen={isSuccessModalOpen}>
-//             <ModalOverlay />
-//             <ModalContent>
-//                 <ModalHeader><Center>{`Your NFT has been listed!`}</Center></ModalHeader>
-//                 <ModalBody>
-//                     <Center>
-//                         <Image w="300px" h="auto" src={IPFSGatewayURL(nftMetadata?.metadata?.image)} />
-//                     </Center>
-//                 </ModalBody>
-//                 <ModalFooter>
-//                     <Center>
-//                         <Button colorScheme="blue" w="100px" h="40px" onClick={() => { navigate(`/nftdetail/${nftMetadata?.contract?.address}/${nftMetadata?.tokenId}`) }}>View listing</Button>
-//                     </Center>
-//                 </ModalFooter>
-//             </ModalContent>
-//         </Modal>
-//     </>
-// )
+function clippedAddress(addr) {
+    return addr && addr.slice(0, 6) + '...' + addr.slice(addr.length - 4, addr.length);
+}
 
 const NFTDetail = (props) => {
     const { contractdAddress, tokenId } = useParams();
@@ -89,7 +71,6 @@ const NFTDetail = (props) => {
     const { nftSaleList, setNftSaleList, refresh: nftSaleListRefresh } = useNftSaleList(nftMetadata?.tokenId, nftMetadata?.contract?.address);
     const [imageLoaded, setImageLoaded] = useState(false);
     const [showSpinner, setShowPinner] = useState(false);
-
 
     console.log("owners", owners);
     let youOwnCount = 0;
@@ -211,7 +192,7 @@ const NFTDetail = (props) => {
         <TableContainer>
             <Table variant='simple' size="sm">
                 <Thead>
-                    <Tr><Th>Unit Price</Th><Th>Amount</Th><Th>Offerer</Th><Th>Status</Th><Th>&nbsp;</Th></Tr>
+                    <Tr><Th>Unit Price</Th><Th>Amount</Th><Th>Offerer</Th><Th>Buyer</Th><Th>Status</Th><Th>&nbsp;</Th></Tr>
                 </Thead>
                 <Tbody>
                     {nftSaleList.map((e, i) => {
@@ -235,7 +216,8 @@ const NFTDetail = (props) => {
                             <Tr key={i}>
                                 <Td>{`${priceInEth} ETH`}</Td>
                                 <Td>{e.amount}</Td>
-                                <Td>{e.offerer}</Td>
+                                <Td>{clippedAddress(e.offerer)}</Td>
+                                <Td>{clippedAddress(e.buyer) ?? ""}</Td>
                                 <Td>{statusText}</Td>
                                 <Td>{btn}</Td>
                             </Tr>
@@ -281,7 +263,7 @@ const NFTDetail = (props) => {
                 {/* right panel */}
                 <Box>
                     {youOwnCount > 0 ?
-                        <LinkBox>
+                        <LinkBox w="100px" h="40px">
                             <LinkOverlay as={RouterLink} to={`/nftsell/${contractdAddress}/${tokenId}`}>
                                 <Button colorScheme="yellow" w="100px" h="40px">Sell</Button>
                             </LinkOverlay>

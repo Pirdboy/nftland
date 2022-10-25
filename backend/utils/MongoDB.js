@@ -35,8 +35,12 @@ function GetMongoCollection(name) {
 }
 
 const MongoInt64 = (num) => {
-    return Long.fromInt(num);
+    return Long.fromNumber(num, true);
 }
+
+const n = MongoInt64(Date.now());
+console.log('MongoInt64结果',n.toString());
+
 
 module.exports = {
     GetMongoClient,

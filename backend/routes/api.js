@@ -11,7 +11,7 @@ const {
     IPFSGatewayURL,
     AlchemyAPI,
 } = require('../utils/NFT');
-const { GetMongoCollection, GenerateObjectId,MongoInt64 } = require('../utils/MongoDB');
+const { GetMongoCollection, GenerateObjectId, MongoInt64 } = require('../utils/MongoDB');
 const {
     NFTLandCollectionContractAddress,
     NFTLandMarketContractAddress,
@@ -474,6 +474,9 @@ router.post("/storenftsale", async (req, res) => {
             return res.status(StatusCodes.BAD_REQUEST).send('signature incorrect');
         }
         const collection = GetMongoCollection('sale_order');
+        console.log('order.startTime',order.startTime,"type",typeof order.startTime);
+        let st = MongoInt64(order.startTime);
+        console.log("test mongoInt64",st,st.toString());
         await collection.insertOne({
             ...order,
             // tokenId: order.tokenId,
