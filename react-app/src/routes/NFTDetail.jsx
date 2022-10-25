@@ -42,10 +42,13 @@ const NFTDetail = (props) => {
     const { contractdAddress, tokenId } = useParams();
     const { account, signer } = useAccountContext();
     const { setNftContextValue } = useNFTDetailContext();
-    const owners = useOwnersForNFT(contractdAddress, tokenId);
-    const nftMetadata = useNFTMetadata(contractdAddress, tokenId);
+    const { owners, refresh: ownersRefresh } = useOwnersForNFT(contractdAddress, tokenId);
+    const { metadata: nftMetadata, refresh: nftMetadataRefresh } = useNFTMetadata(contractdAddress, tokenId);
+    const { nftSaleList, setNftSaleList, refresh: nftSaleListRefresh } = useNftSaleList(nftMetadata?.tokenId, nftMetadata?.contract?.address);
     const [imageLoaded, setImageLoaded] = useState(false);
-    const nftSaleList = useNftSaleList(nftMetadata?.tokenId, nftMetadata?.contract?.address);
+    const [isCancelingSale, setCancelingSale] = useState(false);
+    const [isBuyingSale, setBuyingSale] = useState(false);
+
 
     console.log("owners", owners);
     let youOwnCount = 0;
@@ -64,16 +67,16 @@ const NFTDetail = (props) => {
     }
 
     const onSaleBuyClicked = async (sale) => {
-        console.log("buy", sale);
         try {
+            setBuyingSale(true);
             console.log('sale buy', sale);
             const marketContract = new ethers.Contract(
                 NFTLandMarketContractAddress,
                 NFTLandMarketABI,
                 signer
             );
-            const priceBigNumber = ethers.BigNumber.from(sale.price+'');
-            const amountBigNumber = ethers.BigNumber.from(sale.amount+'');
+            const priceBigNumber = ethers.BigNumber.from(sale.price + '');
+            const amountBigNumber = ethers.BigNumber.from(sale.amount + '');
             let SaleParameters = [
                 ethers.BigNumber.from(sale.tokenId),
                 sale.tokenAddress,
@@ -91,17 +94,25 @@ const NFTDetail = (props) => {
                 SaleParameters,
                 sale.signature,
                 {
-                    value:payValue
+                    value: payValue
                 }
             );
             await txResponse.wait();
             console.log("sale buy success");
+            setBuyingSale(false);
+            setNftSaleList(nftSaleList.map(e =>
+                e.signature === sale.signature
+                    ? { ...e, status: 1 }
+                    : e
+            ))
         } catch (error) {
             console.log('sale buy error', error);
+            setBuyingSale(false);
         }
     }
     const onSaleCancelClicked = async (sale) => {
         try {
+            setCancelingSale(true);
             console.log("sale cancel", sale);
             const marketContract = new ethers.Contract(
                 NFTLandMarketContractAddress,
@@ -126,7 +137,14 @@ const NFTDetail = (props) => {
             );
             await txResponse.wait();
             console.log("sale cancel success");
+            setCancelingSale(false);
+            setNftSaleList(nftSaleList.map(e =>
+                e.signature === sale.signature
+                    ? { ...e, status: 2 }
+                    : e
+            ))
         } catch (error) {
+            setCancelingSale(false);
             console.log("sale cancel error", error);
         }
     };
@@ -150,24 +168,32 @@ const NFTDetail = (props) => {
         <TableContainer>
             <Table variant='simple' size="sm">
                 <Thead>
-                    <Tr><Th>Unit Price</Th><Th>Amount</Th><Th>Offerer</Th><Th>&nbsp;</Th></Tr>
+                    <Tr><Th>Unit Price</Th><Th>Amount</Th><Th>Offerer</Th><Th>Status</Th><Th>&nbsp;</Th></Tr>
                 </Thead>
                 <Tbody>
                     {nftSaleList.map((e, i) => {
                         const priceInEth = ethers.utils.formatEther(ethers.BigNumber.from(e.price));
                         let btn;
-                        if (!account) {
+                        if (!account || e.status > 0) {
                             btn = null;
-                        } else if (e.offerer.toLowerCase() === account.toLowerCase()) {
-                            btn = <Button colorScheme="blue" onClick={() => onSaleCancelClicked(e)}>Cancel</Button>
+                        }
+                        else if (e.offerer.toLowerCase() === account.toLowerCase()) {
+                            btn = <Button isLoading={isCancelingSale} colorScheme="blue" onClick={() => onSaleCancelClicked(e)}>Cancel</Button>
                         } else {
-                            btn = <Button colorScheme="blue" onClick={() => onSaleBuyClicked(e)}>Buy</Button>
+                            btn = <Button isLoading={isBuyingSale} colorScheme="blue" onClick={() => onSaleBuyClicked(e)}>Buy</Button>
+                        }
+                        let statusText = "";
+                        if (e.status === 1) {
+                            statusText = "sold";
+                        } else if (e.status === 2) {
+                            statusText = "canceled";
                         }
                         return (
                             <Tr key={i}>
                                 <Td>{`${priceInEth} ETH`}</Td>
                                 <Td>{e.amount}</Td>
                                 <Td>{e.offerer}</Td>
+                                <Td>{statusText}</Td>
                                 <Td>{btn}</Td>
                             </Tr>
                         )

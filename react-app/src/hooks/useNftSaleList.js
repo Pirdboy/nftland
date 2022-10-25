@@ -1,22 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ServerApi from "../utils/ServerApi";
 
 function useNftSaleList(tokenId, tokenAddress) {
-    const [saleList, setSaleList] = useState([]);
-    useEffect(() => {
-        const f = async () => {
-            try {
-                const r = await ServerApi.GetNftSaleList(tokenId, tokenAddress);
-                console.log("getNftSaleList", r);
-                setSaleList(r);
-            } catch (error) {
-                console.log("useNftSaleList error",error);
-                setSaleList([]);
-            }
-        };
-        f();
+    const [nftSaleList, setNftSaleList] = useState([]);
+    const refresh = useCallback(async () => {
+        try {
+            const r = await ServerApi.GetNftSaleList(tokenId, tokenAddress);
+            console.log("getNftSaleList", r);
+            setNftSaleList(r);
+        } catch (error) {
+            console.log("useNftSaleList error",error);
+            setNftSaleList([]);
+        }
     }, [tokenId, tokenAddress]);
-    return saleList;
+    useEffect(() => {
+        refresh();
+    }, [refresh]);
+    return {nftSaleList, setNftSaleList, refresh};
 }
 
 export default useNftSaleList;

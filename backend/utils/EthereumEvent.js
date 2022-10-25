@@ -53,7 +53,7 @@ const EthereumEventListenOn = () => {
             await saleCollection.updateOne(
                 { signature: _signature },
                 {
-                    $set: { 'buyer': _buyer, 'status': 2, 'finishedTime': now }
+                    $set: { 'buyer': _buyer, 'status': 1, 'finishedTime': now }
                 }
             )
             let results = await saleCollection.find({

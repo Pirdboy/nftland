@@ -1,19 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ServerApi from "../utils/ServerApi";
-// import { GetNFTMetadata } from "../utils/AlchemySDK";
 
 function useNFTMetadata(contractAddress, tokenId) {
     const [metadata, setMetadata] = useState(null);
+    const refresh = useCallback(async () => {
+        const m = await ServerApi.GetNftMetadata(contractAddress, tokenId);
+        if (m) {
+            setMetadata(m);
+        }
+    },[contractAddress, tokenId])
     useEffect(() => {
-        const f = async () => {
-            const m = await ServerApi.GetNftMetadata(contractAddress, tokenId);
-            if (m) {
-                setMetadata(m);
-            }
-        };
-        f();
-    }, [contractAddress, tokenId]);
-    return metadata;
+        refresh();
+    }, [refresh]);
+    return {metadata, refresh};
 }
 
 export default useNFTMetadata;
