@@ -4,17 +4,17 @@
             "name": "backend",
             "path": "./backend"
         },
-		{
-            "name": "examples",
-            "path": "./examples"
+        {
+            "name": "react-app",
+            "path": "./react-app"
         },
         {
             "name": "hardhat",
             "path": "./hardhat"
         },
         {
-            "name": "react-app",
-            "path": "./react-app"
+            "name": "examples",
+            "path": "./examples"
         },
 		{
             "name": "temp",
