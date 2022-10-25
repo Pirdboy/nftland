@@ -128,6 +128,7 @@ const NFTDetail = (props) => {
                     : e
             ))
             setShowPinner(false);
+            ownersRefresh();
         } catch (error) {
             console.log('sale buy error', error);
             setShowPinner(false);
