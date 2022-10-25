@@ -11,7 +11,7 @@ const {
     IPFSGatewayURL,
     AlchemyAPI,
 } = require('../utils/NFT');
-const { GetMongoCollection, GenerateObjectId } = require('../utils/MongoDB');
+const { GetMongoCollection, GenerateObjectId,MongoInt64 } = require('../utils/MongoDB');
 const {
     NFTLandCollectionContractAddress,
     NFTLandMarketContractAddress,
@@ -484,6 +484,7 @@ router.post("/storenftsale", async (req, res) => {
             // startTime: order.startTime,
             // creator: order.creator,
             // totalSupply: order.totalSupply,
+            startTime: MongoInt64(order.startTime),
             signature,
             status: 0
         });

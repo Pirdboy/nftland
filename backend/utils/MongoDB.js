@@ -1,5 +1,5 @@
 const config = require('../configs').mongodb;
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient, ObjectId, Long } = require('mongodb');
 
 const client = new MongoClient(config.uri);
 let nftlandDB;
@@ -34,8 +34,13 @@ function GetMongoCollection(name) {
     return nftlandDB.collection(name);
 }
 
+const MongoInt64 = (num) => {
+    return Long.fromInt(num);
+}
+
 module.exports = {
     GetMongoClient,
     GetMongoCollection,
-    GenerateObjectId
+    GenerateObjectId,
+    MongoInt64
 }

@@ -19,6 +19,11 @@ import {
     Td,
     TableCaption,
     TableContainer,
+    Spinner,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalBody,
 } from "@chakra-ui/react";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import birdImage from "../assets/1.png";
@@ -38,6 +43,43 @@ import NFTLandCollectionABI from "../abis/NFTLandCollection.json";
 
 const EtherscanGoerli = "https://goerli.etherscan.io/address/";
 
+const SpinnerModal = ({ children, isOpen }) => {
+    return (
+        <>
+            <Modal isOpen={isOpen} closeOnOverlayClick={false}>
+                <ModalOverlay />
+                <ModalContent w="100px">
+                    <ModalBody>
+                        {children}
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
+        </>
+    )
+};
+
+
+// const NFTSaleCreateSuccessModal = (
+//     <>
+//         <Modal isOpen={isSuccessModalOpen}>
+//             <ModalOverlay />
+//             <ModalContent>
+//                 <ModalHeader><Center>{`Your NFT has been listed!`}</Center></ModalHeader>
+//                 <ModalBody>
+//                     <Center>
+//                         <Image w="300px" h="auto" src={IPFSGatewayURL(nftMetadata?.metadata?.image)} />
+//                     </Center>
+//                 </ModalBody>
+//                 <ModalFooter>
+//                     <Center>
+//                         <Button colorScheme="blue" w="100px" h="40px" onClick={() => { navigate(`/nftdetail/${nftMetadata?.contract?.address}/${nftMetadata?.tokenId}`) }}>View listing</Button>
+//                     </Center>
+//                 </ModalFooter>
+//             </ModalContent>
+//         </Modal>
+//     </>
+// )
+
 const NFTDetail = (props) => {
     const { contractdAddress, tokenId } = useParams();
     const { account, signer } = useAccountContext();
@@ -46,8 +88,7 @@ const NFTDetail = (props) => {
     const { metadata: nftMetadata, refresh: nftMetadataRefresh } = useNFTMetadata(contractdAddress, tokenId);
     const { nftSaleList, setNftSaleList, refresh: nftSaleListRefresh } = useNftSaleList(nftMetadata?.tokenId, nftMetadata?.contract?.address);
     const [imageLoaded, setImageLoaded] = useState(false);
-    const [isCancelingSale, setCancelingSale] = useState(false);
-    const [isBuyingSale, setBuyingSale] = useState(false);
+    const [showSpinner, setShowPinner] = useState(false);
 
 
     console.log("owners", owners);
@@ -66,9 +107,10 @@ const NFTDetail = (props) => {
         setImageLoaded(true);
     }
 
-    const onSaleBuyClicked = async (sale) => {
+    const onSaleBuyClicked = async (saleIndex) => {
         try {
-            setBuyingSale(true);
+            setShowPinner(true);
+            const sale = nftSaleList[saleIndex];
             console.log('sale buy', sale);
             const marketContract = new ethers.Contract(
                 NFTLandMarketContractAddress,
@@ -99,20 +141,21 @@ const NFTDetail = (props) => {
             );
             await txResponse.wait();
             console.log("sale buy success");
-            setBuyingSale(false);
             setNftSaleList(nftSaleList.map(e =>
                 e.signature === sale.signature
                     ? { ...e, status: 1 }
                     : e
             ))
+            setShowPinner(false);
         } catch (error) {
             console.log('sale buy error', error);
-            setBuyingSale(false);
+            setShowPinner(false);
         }
     }
-    const onSaleCancelClicked = async (sale) => {
+    const onSaleCancelClicked = async (saleIndex) => {
         try {
-            setCancelingSale(true);
+            setShowPinner(true);
+            const sale = nftSaleList[saleIndex]
             console.log("sale cancel", sale);
             const marketContract = new ethers.Contract(
                 NFTLandMarketContractAddress,
@@ -137,15 +180,15 @@ const NFTDetail = (props) => {
             );
             await txResponse.wait();
             console.log("sale cancel success");
-            setCancelingSale(false);
             setNftSaleList(nftSaleList.map(e =>
                 e.signature === sale.signature
                     ? { ...e, status: 2 }
                     : e
             ))
+            setShowPinner(false);
         } catch (error) {
-            setCancelingSale(false);
             console.log("sale cancel error", error);
+            setShowPinner(false);
         }
     };
 
@@ -178,11 +221,11 @@ const NFTDetail = (props) => {
                             btn = null;
                         }
                         else if (e.offerer.toLowerCase() === account.toLowerCase()) {
-                            btn = <Button isLoading={isCancelingSale} colorScheme="blue" onClick={() => onSaleCancelClicked(e)}>Cancel</Button>
+                            btn = <Button colorScheme="blue" onClick={() => onSaleCancelClicked(i)}>Cancel</Button>
                         } else {
-                            btn = <Button isLoading={isBuyingSale} colorScheme="blue" onClick={() => onSaleBuyClicked(e)}>Buy</Button>
+                            btn = <Button colorScheme="blue" onClick={() => onSaleBuyClicked(i)}>Buy</Button>
                         }
-                        let statusText = "";
+                        let statusText = "not sold yet";
                         if (e.status === 1) {
                             statusText = "sold";
                         } else if (e.status === 2) {
@@ -208,7 +251,7 @@ const NFTDetail = (props) => {
             nftMetadata,
             owners
         })
-    }, [nftMetadata, owners])
+    }, [nftMetadata, owners, setNftContextValue])
 
     if (!contractdAddress || !tokenId) {
         return null;
@@ -249,6 +292,9 @@ const NFTDetail = (props) => {
                     {nftSaleListTable}
                 </Box>
             </Flex>
+            <SpinnerModal isOpen={showSpinner}>
+                <Spinner color="black" size="xl" speed="0.7s" />
+            </SpinnerModal>
         </>
     )
 };

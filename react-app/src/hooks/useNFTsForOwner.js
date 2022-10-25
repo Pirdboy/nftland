@@ -33,7 +33,7 @@ function useNFTsForOwner(account) {
             setError(error);
             setLoading(false);
         }
-    })
+    }, [account]);
     useEffect(() => {
         updater();
     }, [updater]);

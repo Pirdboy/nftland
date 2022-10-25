@@ -48,7 +48,7 @@ const EthereumEventListenOn = () => {
     nftMarketContract.on('SaleExecuted', async (_signature, _offerer, _buyer) => {
         console.log(`event SaleExecuted |signature:${_signature} |offerer:${_offerer} |buyer:${_buyer}`);
         try {
-            const now = Data.now();
+            const now = Date.now();
             const saleCollection = GetMongoCollection('sale_order');
             await saleCollection.updateOne(
                 { signature: _signature },

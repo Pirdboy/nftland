@@ -7,7 +7,7 @@ import { IPFSGatewayURL } from "../utils/IPFS";
 
 const NFTCard = ({ nft }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
-    const imageURL = IPFSGatewayURL(nft.metadata.image);
+    const imageURL = IPFSGatewayURL(nft?.metadata?.image ?? nft?.metadata?.image_url);
     return (
         <LinkBox
             maxW="300px"
