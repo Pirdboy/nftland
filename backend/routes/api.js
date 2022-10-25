@@ -86,7 +86,7 @@ router.get('/ping/:a/:b', function (req, res) {
 
 /* test query */
 router.get('/ping2', function (req, res) {
-    let {a, b} = req.query;
+    let { a, b } = req.query;
     return res.send(`pong a:${a} b:${b}`);
 });
 
@@ -283,9 +283,9 @@ router.get("/getnftmetadata/:contractAddress/:tokenId", async (req, res) => {
                 "timeLastUpdated": e.updateAt
             };
         }
-        if(!nft) {
+        if (!nft) {
             const e = await AlchemyAPI.GetNFTMetadata(contractAddress, tokenId);
-            if(!e) {
+            if (!e) {
                 throw new Error("nft does not exist onchain");
             }
             nft = {
@@ -312,12 +312,12 @@ router.get("/getnftmetadata/:contractAddress/:tokenId", async (req, res) => {
 // 获取nft的owners以及余额
 router.get("/getownersfornft/:contractAddress/:tokenId", async (req, res) => {
     let { contractAddress, tokenId } = req.params;
-    if(!nftQueryValidate(contractAddress, tokenId)){
+    if (!nftQueryValidate(contractAddress, tokenId)) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
     }
     try {
         let owners;
-        if(contractAddress.toLowerCase() === NFTLandCollectionContractAddress.toLowerCase()) {
+        if (contractAddress.toLowerCase() === NFTLandCollectionContractAddress.toLowerCase()) {
             const collection = GetMongoCollection('nft');
             const _id = TokenIdToObjectId(tokenId);
             const queryResults = await collection.find({
@@ -327,7 +327,7 @@ router.get("/getownersfornft/:contractAddress/:tokenId", async (req, res) => {
                 ]
             }).toArray();
             // 如果nft没上链
-            if(queryResults?.length > 0) {
+            if (queryResults?.length > 0) {
                 const e = queryResults[0];
                 const ownerAddresses = Object.keys(e.owners);
                 owners = ownerAddresses.map((addr) => {
@@ -339,7 +339,7 @@ router.get("/getownersfornft/:contractAddress/:tokenId", async (req, res) => {
                 })
             }
         }
-        if(!owners) {
+        if (!owners) {
             owners = await AlchemyAPI.GetOwnersForNFT(contractAddress, tokenId);
         }
         return res.send(owners);
@@ -391,13 +391,13 @@ router.get('/generatenftsale', async (req, res) => {
         let totalSupply;
         let tokenType;
         let minted;
-        if(tokenAddress.toLowerCase() === NFTLandCollectionContractAddress.toLowerCase()) {
+        if (tokenAddress.toLowerCase() === NFTLandCollectionContractAddress.toLowerCase()) {
             const collection = GetMongoCollection('nft');
             const _id = TokenIdToObjectId(tokenId);
             const r = await collection.find({
                 _id: _id
             }).toArray();
-            if(!r || r.length === 0) {
+            if (!r || r.length === 0) {
                 throw new Error('nft not exist');
             }
             tokenType = 2;
@@ -406,12 +406,12 @@ router.get('/generatenftsale', async (req, res) => {
             minted = r[0].minted;
         } else {
             const e = await AlchemyAPI.GetNFTMetadata(tokenAddress, tokenId);
-            if(!e) {
+            if (!e) {
                 throw new Error("nft does not exist onchain");
             }
             // "tokenType": e.id.tokenMetadata.tokenType,
             const t = e.id.tokenMetadata.tokenType;
-            if(t === 'ERC1155') {
+            if (t === 'ERC1155') {
                 tokenType = 2;
             } else {
                 tokenType = 1;  // 如果tokenType为空,也认为是ERC721
@@ -426,7 +426,7 @@ router.get('/generatenftsale', async (req, res) => {
             values: {
                 tokenId,
                 tokenAddress,
-                amount:amountNum,
+                amount: amountNum,
                 offerer,
                 price,
                 startTime,
@@ -436,7 +436,7 @@ router.get('/generatenftsale', async (req, res) => {
                 minted
             }
         }
-        console.log('generate sale',data);
+        console.log('generate sale', data);
         return res.send(data);
     } catch (error) {
         console.log(error);
@@ -451,26 +451,26 @@ router.post("/storenftsale", async (req, res) => {
         signature,
         signerAddress
     } = req.body;
-    if(!sale || !signature || !signerAddress) {
+    if (!sale || !signature || !signerAddress) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request body.');
     }
-    let {domain, types, values: order} = sale;
+    let { domain, types, values: order } = sale;
     console.log('sale values:', order);
-    if(!domain || !types || !order) {
+    if (!domain || !types || !order) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request body.');
     }
-    if(order.offerer !== signerAddress) {
+    if (order.offerer !== signerAddress) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request, signerAddress incorrect');
     }
     const now = Math.floor(Date.now() / 1000);
     const timeout = 1200;  // 20 minutes
     const startTimeInSec = Math.floor(order.startTime / 1000);
-    if(!startTimeInSec || now - startTimeInSec > timeout) {
+    if (!startTimeInSec || now - startTimeInSec > timeout) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request, sale timeout');
     }
     try {
         const verifyOk = Signature.VerifyEIP712Signature(domain, types, order, signature, signerAddress);
-        if(!verifyOk) {
+        if (!verifyOk) {
             return res.status(StatusCodes.BAD_REQUEST).send('signature incorrect');
         }
         const collection = GetMongoCollection('sale_order');
@@ -496,7 +496,7 @@ router.post("/storenftsale", async (req, res) => {
 
 router.get("/getnftsalelist", async (req, res) => {
     let { tokenAddress, tokenId } = req.query;
-    if(!nftQueryValidate(tokenAddress, tokenId)) {
+    if (!nftQueryValidate(tokenAddress, tokenId)) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request params.');
     }
     try {
@@ -504,7 +504,7 @@ router.get("/getnftsalelist", async (req, res) => {
         const r = await collection.find({
             tokenId,
             tokenAddress
-        }).toArray();
+        }).sort({ startTime: -1 }).toArray();
         console.log('getnftsalelist', r);
         return res.send(r ?? []);
     } catch (error) {

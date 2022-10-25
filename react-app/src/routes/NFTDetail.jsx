@@ -124,7 +124,7 @@ const NFTDetail = (props) => {
             console.log("sale buy success");
             setNftSaleList(nftSaleList.map(e =>
                 e.signature === sale.signature
-                    ? { ...e, status: 1 }
+                    ? { ...e, status: 1, buyer: account }
                     : e
             ))
             setShowPinner(false);
