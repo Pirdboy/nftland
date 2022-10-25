@@ -10,13 +10,46 @@ import {
     FormControl,
     FormLabel,
     Tooltip,
-    useToast
+    useToast,
+    Link,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalCloseButton,
+    ModalBody,
+    ModalHeader
 } from "@chakra-ui/react";
 import { InfoOutlineIcon } from "@chakra-ui/icons";
 import { useAccountContext } from "../contexts/Account";
 import NumberInput from "../components/NumberInput";
 import ServerApi from "../utils/ServerApi";
+import { Link as RouterLink } from "react-router-dom";
 
+const CreateSuccessModal = ({
+    isOpen,
+    onClose,
+    contractAddress,
+    tokenId
+}) => {
+    return (
+        <>
+            <Modal isOpen={isOpen} closeOnOverlayClick={true} onClose={onClose}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Create Success!</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <Center minH="120px">
+                            <Link fontSize="2xl" color="blue.500" as={RouterLink} to={`/nftdetail/${contractAddress}/${tokenId}`}>
+                                view your nft
+                            </Link>
+                        </Center>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
+        </>
+    )
+}
 
 const CreateNFT = () => {
     const toast = useToast();
@@ -30,6 +63,10 @@ const CreateNFT = () => {
     const [totalSupply, setTotalSupply] = useState('');
     const [totalSupplyInvalid, setTotalSupplyInvalid] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [createdTokenAddress, setCreatedTokenAddress] = useState('');
+    const [createdTokenId, setCreatedTokenId] = useState('');
+
     console.log("react NODE_ENV", process.env.NODE_ENV);
 
     const showErrorToast = (title, errorMessage) => {
@@ -93,15 +130,16 @@ const CreateNFT = () => {
             return
         }
         const t = Number(totalSupply);
-        if(isNaN(t) || t <= 0) {
+        if (isNaN(t) || t <= 0) {
             setTotalSupplyInvalid(true);
             setErrorMessage("totalSupply must be greater than zero");
             return
         }
-        // await ServerApi.TestUpload(inputFile);
         const response = await ServerApi.CreateNft(name, desc, inputFile, totalSupply, signer, account);
-        showSuccessToast("Create NFT", 'success');
-        // await ServerApi.TestSignMessage(signer);
+        // showSuccessToast("Create NFT", 'success');
+        setCreatedTokenAddress(response.contractAddress);
+        setCreatedTokenId(response.tokenId);
+        setShowSuccessModal(true);
     }
 
     // const createModeTips = "Sit nulla est ex deserunt exercitation anim occaecat. Nostrud ullamco deserunt aute id consequat veniam incididunt duis in sint irure nisi. Mollit officia cillum Lorem ullamco minim nostrud elit officia tempor esse quis.Sunt ad dolore quis aut"
@@ -116,38 +154,45 @@ const CreateNFT = () => {
     )
 
     return (
-        <Center pt="10px">
-            <Box w="400px" minH="200px">
-                <Text fontSize="xl" align="center">Create NFT</Text>
-                <FormControl isRequired>
-                    <FormLabel>NFT Name</FormLabel>
-                    <Input value={name} isInvalid={nameInvalid} onChange={onChangeName} />
-                    <Box h="5px"></Box>
-                    <FormLabel>NFT Description</FormLabel>
-                    <Textarea value={desc} isInvalid={descInvalid} onChange={onChangeDesc} />
-                    <Box h="5px"></Box>
-                    <FormLabel>Upload Image</FormLabel>
-                    <Input type="file" onChange={onChangeFile} isInvalid={fileInvalid} accept="image/*" />
-                    {
-                        errorMessage ? <Text color="red.500" fontSize="lg">{errorMessage}</Text> : null
-                    }
-                    <FormLabel>Total Supply</FormLabel>
-                    <NumberInput value={totalSupply} onChange={onChangeTotalSupply} isInvalid={totalSupplyInvalid} />
-                    <Box h="5px"></Box>
-                    <Flex>
-                        {"create is free"}
-                        <Box w="5px"></Box>
-                        <Center>
-                        <Tooltip hasArrow label={createModeTips} placement="top">
-                            <InfoOutlineIcon />
-                        </Tooltip>
-                        </Center>
-                    </Flex>
-                    <Box h="10px"></Box>
-                    <Center><Button size="lg" colorScheme="purple" onClick={onClickCreate}>Create</Button></Center>
-                </FormControl>
-            </Box>
-        </Center>
+        <>
+            <Center pt="10px">
+                <Box w="400px" minH="200px">
+                    <Text fontSize="xl" align="center">Create NFT</Text>
+                    <FormControl isRequired>
+                        <FormLabel>NFT Name</FormLabel>
+                        <Input value={name} isInvalid={nameInvalid} onChange={onChangeName} />
+                        <Box h="5px"></Box>
+                        <FormLabel>NFT Description</FormLabel>
+                        <Textarea value={desc} isInvalid={descInvalid} onChange={onChangeDesc} />
+                        <Box h="5px"></Box>
+                        <FormLabel>Upload Image</FormLabel>
+                        <Input type="file" onChange={onChangeFile} isInvalid={fileInvalid} accept="image/*" />
+                        {
+                            errorMessage ? <Text color="red.500" fontSize="lg">{errorMessage}</Text> : null
+                        }
+                        <FormLabel>Total Supply</FormLabel>
+                        <NumberInput value={totalSupply} onChange={onChangeTotalSupply} isInvalid={totalSupplyInvalid} />
+                        <Box h="5px"></Box>
+                        <Flex>
+                            {"create is free"}
+                            <Box w="5px"></Box>
+                            <Center>
+                                <Tooltip hasArrow label={createModeTips} placement="top">
+                                    <InfoOutlineIcon />
+                                </Tooltip>
+                            </Center>
+                        </Flex>
+                        <Box h="10px"></Box>
+                        <Center><Button size="lg" colorScheme="purple" onClick={onClickCreate}>Create</Button></Center>
+                    </FormControl>
+                </Box>
+            </Center>
+            <CreateSuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                contractAddress={createdTokenAddress}
+                tokenId={createdTokenId} />
+        </>
     )
 };
 
