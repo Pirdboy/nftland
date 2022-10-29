@@ -5,7 +5,7 @@ const messageToSign = "This request will not trigger a blockchain transaction or
 
 const baseApiUrl = {
     development: "http://192.168.25.129/api",
-    production: "",
+    production: "http://nftland.pirddev.life/api",
 }
 const createNftUrl = `${baseApiUrl[process.env.NODE_ENV]}/createnft/`;
 const getNftsForOwnerUrl = `${baseApiUrl[process.env.NODE_ENV]}/getnftsforowner/`;

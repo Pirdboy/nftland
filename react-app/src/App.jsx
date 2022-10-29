@@ -38,6 +38,7 @@ function App() {
     const { chainId, connect } = useAccountContext();
     const [showNetworkWarning, setShowNetworkWarning] = useState(false);
     console.log("chainId", chainId);
+    console.log("node env", process.env.NODE_ENV);
     useEffect(() => {
         if (chainId !== undefined && !IsSupportedChain(chainId)) {
             setShowNetworkWarning(true);
@@ -62,6 +63,7 @@ function App() {
             }
         };
         checkMetamaskConnect();
+        // eslint-disable-next-line
     }, [])
     return (
         <Background>
