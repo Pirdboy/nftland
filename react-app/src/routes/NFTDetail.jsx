@@ -72,7 +72,6 @@ const NFTDetail = (props) => {
     const [imageLoaded, setImageLoaded] = useState(false);
     const [showSpinner, setShowPinner] = useState(false);
 
-    console.log("owners", owners);
     let youOwnCount = 0;
     for (let i = 0; i < owners?.length; i++) {
         if (owners[i].owner?.toLowerCase() === account?.toLowerCase()) {
@@ -92,7 +91,6 @@ const NFTDetail = (props) => {
         try {
             setShowPinner(true);
             const sale = nftSaleList[saleIndex];
-            console.log('sale buy', sale);
             const marketContract = new ethers.Contract(
                 NFTLandMarketContractAddress,
                 NFTLandMarketABI,
@@ -121,7 +119,6 @@ const NFTDetail = (props) => {
                 }
             );
             await txResponse.wait();
-            console.log("sale buy success");
             setNftSaleList(nftSaleList.map(e =>
                 e.signature === sale.signature
                     ? { ...e, status: 1, buyer: account }
@@ -130,7 +127,6 @@ const NFTDetail = (props) => {
             setShowPinner(false);
             ownersRefresh();
         } catch (error) {
-            console.log('sale buy error', error);
             setShowPinner(false);
         }
     }
@@ -138,7 +134,6 @@ const NFTDetail = (props) => {
         try {
             setShowPinner(true);
             const sale = nftSaleList[saleIndex]
-            console.log("sale cancel", sale);
             const marketContract = new ethers.Contract(
                 NFTLandMarketContractAddress,
                 NFTLandMarketABI,
@@ -161,7 +156,6 @@ const NFTDetail = (props) => {
                 sale.signature
             );
             await txResponse.wait();
-            console.log("sale cancel success");
             setNftSaleList(nftSaleList.map(e =>
                 e.signature === sale.signature
                     ? { ...e, status: 2 }
@@ -169,7 +163,6 @@ const NFTDetail = (props) => {
             ))
             setShowPinner(false);
         } catch (error) {
-            console.log("sale cancel error", error);
             setShowPinner(false);
         }
     };

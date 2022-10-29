@@ -56,11 +56,9 @@ const MintBirdNFT = () => {
         }
         let txResponse = await birdNFTContract.mintNFT({ value: ethers.utils.parseEther("0.01") })
         const receipt = await txResponse.wait();
-        console.log(`Transaction was mined in block ${receipt.blockNumber}`);
         let transferEvent = receipt.events[0];
         let tokenIdArg = transferEvent.args[2];
         let tokenId = tokenIdArg.toNumber();
-        console.log("mintNFT tokenId", tokenId);
         return tokenId;
     };
 

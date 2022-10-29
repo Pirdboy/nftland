@@ -8,7 +8,6 @@ function useTopSaleList() {
             const r = await ServerApi.GetTopSaleList();
             setTopSaleList(r);
         } catch (error) {
-            console.log("useTopSaleList", error);
             setTopSaleList([]);
         }
     }, []);

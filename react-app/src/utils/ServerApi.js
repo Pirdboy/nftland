@@ -29,9 +29,6 @@ class ServerApi {
      */
     static async CreateNft(name, description, imageFile, totalSupply, signer, account) {
         let signature = await signer.signMessage(messageToSign);
-        console.log("createnft signature", signature);
-        let e = process.env.NODE_ENV;
-        console.log('e',e);
         const postUrl = createNftUrl;
         let formData = new FormData();
         formData.append("name", name);
@@ -40,7 +37,6 @@ class ServerApi {
         formData.append("creator", account);
         formData.append("totalSupply", totalSupply);
         formData.append("signature", signature);
-        console.log('postUrl', postUrl);
         const response = await axios.post(postUrl, formData);
         return response.data;
     }
@@ -51,7 +47,6 @@ class ServerApi {
      * @returns {Promise<Array>}
      */
     static async GetNftsForOwner(account) {
-        console.log('account',account);
         if(!account) {
             return [];
         }
@@ -61,8 +56,6 @@ class ServerApi {
                 'Cache-Control': 'no-cache'
             }
         });
-        console.log("[debug] getnfts url", url);
-        console.log("[debug] GetNftsForOwner data", response.data);
         return response.data;
     }
 
@@ -82,7 +75,6 @@ class ServerApi {
                 'Cache-Control': 'no-cache'
             }
         });
-        console.log("[debug] GetNftMetadata data", response.data);
         return response.data;
     }
 
@@ -102,7 +94,6 @@ class ServerApi {
                 'Cache-Control': 'no-cache'
             }
         });
-        console.log("[debug] GetOwnersForNft data", response.data);
         return response.data;
     }
 
@@ -125,7 +116,6 @@ class ServerApi {
                 'Cache-Control': 'no-cache'
             }
         });
-        console.log("[debug] GenerateSale data", response.data);
         return response.data;
     }
 
@@ -159,13 +149,11 @@ class ServerApi {
             return [];
         }
         const url = `${getNftSaleListUrl}?tokenId=${tokenId}&tokenAddress=${tokenAddress}`;
-        console.log('GetNftSaleList url', url);
         const resp = await axios.get(url, {
             headers:{
                 'Cache-Control': 'no-cache'
             }
         });
-        console.log('GetNftSaleList data', resp.data);
         return resp.data;
     }
 
@@ -176,24 +164,6 @@ class ServerApi {
             }
         });
         return resp.data;
-    }
-
-    static async TestUpload(imageFile) {
-        const url = "http://192.168.25.129/api/test/upload";
-        let name = "uploadName";
-        let symbol = "100";
-        let formData = new FormData();
-        formData.append('name', name);
-        formData.append('symbol', symbol);
-        formData.append('image', imageFile);
-        const response = await axios.post(url, formData);
-        const resBody = response.data;
-        console.log(resBody);
-    }
-
-    static async TestSignMessage(signer) {
-        let signature = await signer.signMessage(messageToSign);
-        console.log("signature", signature);
     }
 };
 

@@ -133,10 +133,7 @@ const NFTSell = () => {
                 }
             }
             // 2. 获取订单数据
-            console.log("step 2");
             const priceInWei = ethers.utils.parseEther(price).toString();
-            console.log('price', price);
-            console.log('priceInWei', priceInWei);
             const sale = await ServerApi.GenerateNftSale(
                 nftMetadata.tokenId,
                 nftMetadata.contract.address,
@@ -148,13 +145,11 @@ const NFTSell = () => {
             let signature = await signer._signTypedData(sale.domain, sale.types, sale.values);
             // 4. 提交订单
             let response = await ServerApi.StoreNftSale(sale, signature, account);
-            console.log("StoreNftSale response:", response);
             setSuccessModalOpen(true);
             setListing(false);
         } catch (error) {
             setSuccessModalOpen(false);
             setListing(false);
-            console.log(error);
             showErrorToast("list nft", error);
         }
     }

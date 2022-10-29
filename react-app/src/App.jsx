@@ -37,7 +37,6 @@ const NetworkWarning = ({ close }) => {
 function App() {
     const { chainId, connect } = useAccountContext();
     const [showNetworkWarning, setShowNetworkWarning] = useState(false);
-    console.log("chainId", chainId);
     console.log("node env", process.env.NODE_ENV);
     useEffect(() => {
         if (chainId !== undefined && !IsSupportedChain(chainId)) {
@@ -56,10 +55,7 @@ function App() {
             }
             const accounts = await ethereum.request({ method: 'eth_accounts' });
             if (accounts.length !== 0) {
-                console.log('Found authorized Account: ', accounts[0]);
                 connect();
-            } else {
-                console.log('No authorized account found');
             }
         };
         checkMetamaskConnect();

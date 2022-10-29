@@ -44,10 +44,8 @@ const Demo = () => {
         };
 
         let signature = await signer._signTypedData(domain, types, value);
-        console.log("signature", signature);
 
         let signature2 = ethers.utils._TypedDataEncoder.hash(domain, types, value);
-        console.log("signature2", signature2);
     };
     const signPersonal = async () => {
         await signer.signMessage("welcome to NFTLand! Click Sign to sign in.");

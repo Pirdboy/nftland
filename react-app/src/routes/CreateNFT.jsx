@@ -67,8 +67,6 @@ const CreateNFT = () => {
     const [createdTokenAddress, setCreatedTokenAddress] = useState('');
     const [createdTokenId, setCreatedTokenId] = useState('');
 
-    console.log("react NODE_ENV", process.env.NODE_ENV);
-
     const showErrorToast = (title, errorMessage) => {
         toast({
             title: title,
