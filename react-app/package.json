@@ -12,7 +12,6 @@
     "@testing-library/user-event": "^13.5.0",
     "@uniswap/sdk": "^3.0.3",
     "@walletconnect/web3-provider": "^1.8.0",
-    "alchemy-sdk": "^2.0.4",
     "assert": "^2.0.0",
     "axios": "^0.27.2",
     "buffer": "^6.0.3",
