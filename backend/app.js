@@ -3,12 +3,9 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const fileUpload = require('express-fileupload');
 require('./utils/MongoDB');
 
 const apiRouter = require('./routes/api');
-const apiTestRouter = require('./example/apitest');
-
 
 var app = express();
 
@@ -30,7 +27,6 @@ app.all('/*', (req, res, next) => {
 });
 
 app.use('/api', apiRouter);
-app.use('/apitest', apiTestRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
