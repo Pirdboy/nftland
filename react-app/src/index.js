@@ -4,7 +4,6 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
-import { EthersAppContext } from 'eth-hooks/context';
 import { AccountContextProvider } from './contexts/Account';
 import { NFTDetailContextProvider } from './contexts/NFTDetailContext';
 import theme from './theme';
@@ -14,21 +13,18 @@ import CreateNFT from './routes/CreateNFT';
 import MintBirdNFT from './routes/MintBirdNFT';
 import Profile from './routes/Profile';
 import NFTDetail from './routes/NFTDetail';
-import Demo from './routes/Demo';
 import NFTSell from './routes/NFTSell';
 
 
 function ContextProvider({ children }) {
     return (
-        <EthersAppContext>
-            <AccountContextProvider>
-                <NFTDetailContextProvider>
-                    <ChakraProvider>
-                        {children}
-                    </ChakraProvider>
-                </NFTDetailContextProvider>
-            </AccountContextProvider>
-        </EthersAppContext>
+        <AccountContextProvider>
+            <NFTDetailContextProvider>
+                <ChakraProvider>
+                    {children}
+                </ChakraProvider>
+            </NFTDetailContextProvider>
+        </AccountContextProvider>
     )
 }
 
@@ -48,7 +44,6 @@ root.render(
                         <Route path="nftdetail/:contractdAddress/:tokenId" element={<NFTDetail />}>
                         </Route>
                         <Route path="nftsell/:contractAddress/:tokenId" element={<NFTSell />} />
-                        <Route path="demo" element={<Demo />} />
                     </Route>
                 </Routes>
             </ContextProvider>

@@ -16,10 +16,8 @@ import {
     ModalHeader,
     ModalFooter,
     ModalBody,
-    LinkBox,
-    LinkOverlay
 } from "@chakra-ui/react";
-import { useParams, Link as RouterLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { IPFSGatewayURL } from "../utils/IPFS";
 import { useAccountContext } from "../contexts/Account";
 import { useNFTDetailContext } from "../contexts/NFTDetailContext";
@@ -144,7 +142,7 @@ const NFTSell = () => {
             // 3. EIP712签名
             let signature = await signer._signTypedData(sale.domain, sale.types, sale.values);
             // 4. 提交订单
-            let response = await ServerApi.StoreNftSale(sale, signature, account);
+            await ServerApi.StoreNftSale(sale, signature, account);
             setSuccessModalOpen(true);
             setListing(false);
         } catch (error) {

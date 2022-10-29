@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import {
-    Center,
     Box,
     Image,
     Text,
     Flex,
-    Link,
     LinkBox,
     LinkOverlay,
     Skeleton,
@@ -13,11 +11,9 @@ import {
     Table,
     Thead,
     Tbody,
-    Tfoot,
     Tr,
     Th,
     Td,
-    TableCaption,
     TableContainer,
     Spinner,
     Modal,
@@ -26,7 +22,6 @@ import {
     ModalBody,
 } from "@chakra-ui/react";
 import { useParams, Link as RouterLink } from "react-router-dom";
-import birdImage from "../assets/1.png";
 import { IPFSGatewayURL } from "../utils/IPFS";
 import useNFTMetadata from "../hooks/useNFTMetadata";
 import useOwnersForNFT from "../hooks/useOwnersForNFT";
@@ -35,11 +30,9 @@ import { useAccountContext } from "../contexts/Account";
 import { useNFTDetailContext } from "../contexts/NFTDetailContext";
 import { ethers } from "ethers";
 import {
-    NFTLandCollectionContractAddress,
     NFTLandMarketContractAddress
 } from "../constants/Addresses";
 import NFTLandMarketABI from "../abis/NFTLandMarket.json";
-import NFTLandCollectionABI from "../abis/NFTLandCollection.json";
 
 const EtherscanGoerli = "https://goerli.etherscan.io/address/";
 

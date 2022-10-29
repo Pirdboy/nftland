@@ -7,37 +7,12 @@ import {
     LinkBox,
     LinkOverlay,
     Skeleton,
-    SkeletonText,
     Image
 } from "@chakra-ui/react";
 import useNFTMetadata from "../hooks/useNFTMetadata";
 import useTopSaleList from "../hooks/useTopSaleList";
 import { IPFSGatewayURL } from "../utils/IPFS";
 import { Link as RouterLink } from 'react-router-dom';
-
-// const NFTCard = ({ nft }) => {
-//     const [imageLoaded, setImageLoaded] = useState(false);
-//     const imageURL = IPFSGatewayURL(nft?.metadata?.image ?? nft?.metadata?.image_url);
-//     return (
-//         <LinkBox
-//             maxW="300px"
-//             minW="200px"
-//             bg="whiteAlpha.900"
-//             boxShadow="dark-lg"
-//             rounded="md"
-//         >
-//             <LinkOverlay as={RouterLink} to={`/nftdetail/${nft.contract.address}/${nft.tokenId}`}>
-//                 <Box h="10px"></Box>
-//                 <Skeleton isLoaded={imageLoaded} minW="200px" minH="150px">
-//                     <Image src={imageURL} onLoad={() => setImageLoaded(true)} />
-//                 </Skeleton>
-//                 <SkeletonText mt="5px" h="48px" isLoaded={true} noOfLines={1} spacing='4'>
-//                     <Box color="black" pl="5px"><b>{nft.metadata.name}</b></Box>
-//                 </SkeletonText>
-//             </LinkOverlay>
-//         </LinkBox>
-//     )
-// };
 
 const NFTCard = ({ tokenAddress, tokenId }) => {
     const [imageLoaded, setImageLoaded] = useState(false);

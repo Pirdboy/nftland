@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Center, Alert, AlertIcon, AlertTitle, AlertDescription } from "@chakra-ui/react";
+import React from "react";
+import { Center, Alert, AlertIcon, AlertDescription } from "@chakra-ui/react";
 const NotLogin = () => {
     return (
         <Center>

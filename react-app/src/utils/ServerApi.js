@@ -1,5 +1,4 @@
 const axios = require('axios').default;
-const {ethers} = require('ethers');
 
 const messageToSign = "This request will not trigger a blockchain transaction or cost any gas fees.\n\nWe need the signature to prove you are the creator";
 

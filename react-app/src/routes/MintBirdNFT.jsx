@@ -6,7 +6,6 @@ import { BirdNFTAddress } from "../constants/Addresses";
 import useContractWriter from "../hooks/useContractWriter";
 import BirdNFTABI from "../abis/BirdNFT.json";
 import { ethers } from "ethers";
-import { IPFSGatewayURL } from "../utils/IPFS";
 import { useAccountContext } from "../contexts/Account";
 import { Link as RouterLink } from 'react-router-dom';
 

@@ -3,9 +3,9 @@ import { useMemo } from 'react';
 import { useAccountContext } from '../contexts/Account';
 
 function useContractWriter(abi, address) {
-    const {signer} = useAccountContext();
+    const { signer } = useAccountContext();
     const contract = useMemo(() => {
-        if(!signer || !abi || !address) {
+        if (!signer || !abi || !address) {
             return null;
         }
         return new ethers.Contract(address, abi, signer);

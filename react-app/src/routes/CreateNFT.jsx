@@ -77,16 +77,6 @@ const CreateNFT = () => {
             position: 'top'
         })
     }
-    const showSuccessToast = (title, message) => {
-        toast({
-            title: title,
-            description: message,
-            duration: 2000,
-            status: 'success',
-            isClosable: false,
-            position: 'top'
-        })
-    }
     const onChangeName = e => {
         setNameInvalid(false);
         setErrorMessage("");

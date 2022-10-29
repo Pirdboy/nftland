@@ -39,7 +39,7 @@ function App() {
     const [showNetworkWarning, setShowNetworkWarning] = useState(false);
     console.log("node env", process.env.NODE_ENV);
     useEffect(() => {
-        if (chainId !== undefined && !IsSupportedChain(chainId)) {
+        if (chainId && !IsSupportedChain(chainId)) {
             setShowNetworkWarning(true);
         } else {
             setShowNetworkWarning(false);
