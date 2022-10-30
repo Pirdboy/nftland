@@ -1,6 +1,6 @@
 const { ethers } = require('hardhat');
 
-const BaseURI = "http://192.168.25.129/nftland/static/"
+const BaseURI = "http://static.pirddev.life/nftland/"
 
 const main = async () => {
     // owner2暂时部署不了, 只能用owner1
