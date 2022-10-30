@@ -24,6 +24,7 @@ import { useAccountContext } from "../contexts/Account";
 import NumberInput from "../components/NumberInput";
 import ServerApi from "../utils/ServerApi";
 import { Link as RouterLink } from "react-router-dom";
+import { IsSupportedChain } from "../utils/ChainId";
 
 const CreateSuccessModal = ({
     isOpen,
@@ -53,7 +54,7 @@ const CreateSuccessModal = ({
 
 const CreateNFT = () => {
     const toast = useToast();
-    const { account, signer } = useAccountContext();
+    const { account, chainId, signer } = useAccountContext();
     const [name, setName] = useState('');
     const [nameInvalid, setNameInvalid] = useState(false);
     const [desc, setDesc] = useState('');
@@ -123,8 +124,11 @@ const CreateNFT = () => {
             setErrorMessage("totalSupply must be greater than zero");
             return
         }
+        if(!IsSupportedChain(chainId)) {
+            setErrorMessage("unsupported network");
+            return;
+        }
         const response = await ServerApi.CreateNft(name, desc, inputFile, totalSupply, signer, account);
-        // showSuccessToast("Create NFT", 'success');
         setCreatedTokenAddress(response.contractAddress);
         setCreatedTokenId(response.tokenId);
         setShowSuccessModal(true);

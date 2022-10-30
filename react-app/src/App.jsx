@@ -29,7 +29,7 @@ const NetworkWarning = ({ close }) => {
                 You wallet is not connected to the right network, please connect to <b>Goerli</b> Network
             </AlertDescription>
             <Box flex="1 1 auto"></Box>
-            <CloseButton flex="0 0 auto" onClick={close} />
+            {/* <CloseButton flex="0 0 auto" onClick={close} /> */}
         </Alert>
     )
 };

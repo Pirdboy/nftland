@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Center, Text, Button, Image, Link, Spinner, useToast } from "@chakra-ui/react";
+import { Box, Center, Text, Button, Link, Spinner, useToast } from "@chakra-ui/react";
 import birdImages from "../assets/bird";
 import TimedImage from "../components/TimedImage";
 import { BirdNFTAddress } from "../constants/Addresses";
@@ -8,10 +8,10 @@ import BirdNFTABI from "../abis/BirdNFT.json";
 import { ethers } from "ethers";
 import { useAccountContext } from "../contexts/Account";
 import { Link as RouterLink } from 'react-router-dom';
-
+import { IsSupportedChain } from "../utils/ChainId";
 
 const MintBirdNFT = () => {
-    const { account } = useAccountContext();
+    const { account, chainId } = useAccountContext();
     const [isMinting, setMinting] = useState(false);
     const [mintedTokenId, setMintedTokenId] = useState(null);
     const toast = useToast();
@@ -53,6 +53,10 @@ const MintBirdNFT = () => {
         if (!account) {
             throw new Error('not connected');
         }
+        if(!IsSupportedChain(chainId)) {
+            throw new Error('unsupported network');
+        }
+
         let txResponse = await birdNFTContract.mintNFT({ value: ethers.utils.parseEther("0.01") })
         const receipt = await txResponse.wait();
         let transferEvent = receipt.events[0];

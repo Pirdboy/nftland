@@ -17,7 +17,7 @@ export function GetChainName(chainId) {
 
 
 /**
- * 是否支持chainId对应的网络(只支持Rinkeby)
+ * 是否支持chainId对应的网络(只支持Goerli)
  * @param {number} chainId
  * @returns {boolean}
  */

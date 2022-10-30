@@ -27,9 +27,10 @@ import DecimalNumberInput from "../components/DecimalNumberInput";
 import { ethers } from 'ethers';
 import { NFTLandCollectionContractAddress, NFTLandMarketContractAddress } from "../constants/Addresses";
 import ServerApi from "../utils/ServerApi";
+import { IsSupportedChain } from "../utils/ChainId";
 
 const NFTSell = () => {
-    const { account, signer } = useAccountContext();
+    const { account, chainId, signer } = useAccountContext();
     const { nftContextValue } = useNFTDetailContext();
     const [amount, setAmount] = useState('');
     const [price, setPrice] = useState('');
@@ -116,6 +117,9 @@ const NFTSell = () => {
     }
     const onCompleteListingClick = async e => {
         try {
+            if(!IsSupportedChain(chainId)) {
+                throw new Error('unsupported network');
+            }
             setListing(true);
             // 1. 如果是外部NFT则需要setApprovalForAll
             // 先查询approval情况, 如果已经approval了则不需要

@@ -33,8 +33,7 @@ import {
     NFTLandMarketContractAddress
 } from "../constants/Addresses";
 import NFTLandMarketABI from "../abis/NFTLandMarket.json";
-
-const EtherscanGoerli = "https://goerli.etherscan.io/address/";
+import { IsSupportedChain } from "../utils/ChainId";
 
 const SpinnerModal = ({ children, isOpen }) => {
     return (
@@ -57,11 +56,11 @@ function clippedAddress(addr) {
 
 const NFTDetail = (props) => {
     const { contractdAddress, tokenId } = useParams();
-    const { account, signer } = useAccountContext();
+    const { account, chainId, signer } = useAccountContext();
     const { setNftContextValue } = useNFTDetailContext();
     const { owners, refresh: ownersRefresh } = useOwnersForNFT(contractdAddress, tokenId);
-    const { metadata: nftMetadata, refresh: nftMetadataRefresh } = useNFTMetadata(contractdAddress, tokenId);
-    const { nftSaleList, setNftSaleList, refresh: nftSaleListRefresh } = useNftSaleList(nftMetadata?.tokenId, nftMetadata?.contract?.address);
+    const { metadata: nftMetadata} = useNFTMetadata(contractdAddress, tokenId);
+    const { nftSaleList, setNftSaleList } = useNftSaleList(nftMetadata?.tokenId, nftMetadata?.contract?.address);
     const [imageLoaded, setImageLoaded] = useState(false);
     const [showSpinner, setShowPinner] = useState(false);
 
@@ -82,6 +81,9 @@ const NFTDetail = (props) => {
 
     const onSaleBuyClicked = async (saleIndex) => {
         try {
+            if(!IsSupportedChain(chainId)) {
+                throw new Error('unsupported network');
+            }
             setShowPinner(true);
             const sale = nftSaleList[saleIndex];
             const marketContract = new ethers.Contract(
