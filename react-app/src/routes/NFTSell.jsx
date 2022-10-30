@@ -140,6 +140,7 @@ const NFTSell = () => {
                 priceInWei
             );
             // 3. EIP712签名
+            console.log('signer address', (await signer.getAddress()));
             let signature = await signer._signTypedData(sale.domain, sale.types, sale.values);
             // 4. 提交订单
             await ServerApi.StoreNftSale(sale, signature, account);
@@ -149,7 +150,7 @@ const NFTSell = () => {
             console.log(error);
             setSuccessModalOpen(false);
             setListing(false);
-            showErrorToast("list nft", error);
+            showErrorToast("list nft", error.message);
         }
     }
 
