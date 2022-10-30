@@ -455,6 +455,9 @@ router.post("/storenftsale", async (req, res) => {
     if (!sale || !signature || !signerAddress) {
         return res.status(StatusCodes.BAD_REQUEST).send('bad request body.');
     }
+    console.log('sale',sale);
+    console.log('signature',signature);
+    console.log('signerAddress', signerAddress);
     let { domain, types, values: order } = sale;
     console.log('sale values:', order);
     if (!domain || !types || !order) {

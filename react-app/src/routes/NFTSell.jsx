@@ -146,6 +146,7 @@ const NFTSell = () => {
             setSuccessModalOpen(true);
             setListing(false);
         } catch (error) {
+            console.log(error);
             setSuccessModalOpen(false);
             setListing(false);
             showErrorToast("list nft", error);
