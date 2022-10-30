@@ -15,7 +15,7 @@ import { Outlet } from 'react-router-dom';
 
 const Background = ({ children }) => {
     return (
-        <Box w="100vw" h="100vh" bgImage={`url(${bg})`} bgSize="200% 180%" bgRepeat="no-repeat">
+        <Box w="100vw" minH="100vh" bgImage={`url(${bg})`} bgSize="200% 180%" bgRepeat="no-repeat">
             {children}
         </Box>
     )

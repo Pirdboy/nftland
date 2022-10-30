@@ -183,7 +183,7 @@ const NFTSell = () => {
                 <Box>
                     <Text fontSize="2xl">Preview</Text>
                     <Skeleton isLoaded={imageLoaded} w="380px" h="300px">
-                        <Image src={IPFSGatewayURL(nftMetadata?.metadata?.image)} onLoad={onImageLoaded} />
+                        <Image maxW="380px" maxH="300px" src={IPFSGatewayURL(nftMetadata?.metadata?.image)} onLoad={onImageLoaded} />
                     </Skeleton>
                 </Box>
             </Center>

@@ -228,17 +228,23 @@ const NFTDetail = (props) => {
         return null;
     }
 
+    const imageSkeletonStyle = {width:"380px", height:"300px"}
+    const imageStyle = {"maxWidth": "380px", "maxHeight":"300px"}
+
     return (
         <>
             <Flex p="20px" justify="center">
                 {/* left panel */}
                 <Box w="400px">
-                    <Skeleton isLoaded={imageLoaded} w="380px" h="300px">
-                        <Image src={IPFSGatewayURL(nftMetadata?.metadata?.image)} onLoad={onImageLoaded} />
+                    <Skeleton isLoaded={imageLoaded} style={imageSkeletonStyle}>
+                        <Image style={imageStyle} src={IPFSGatewayURL(nftMetadata?.metadata?.image)} onLoad={onImageLoaded} />
                     </Skeleton>
                     <Box h="10px" />
-                    <Text fontSize="lg" fontWeight="bold">{nftMetadata?.metadata?.name}</Text>
+                    <Text fontSize="lg" fontWeight="bold">Name</Text>
+                    <Text fontSize="md">{nftMetadata?.metadata?.name}</Text>
+                    <Text fontSize="lg" fontWeight="bold">Description</Text>
                     <Text fontSize="md">{nftMetadata?.metadata?.description}</Text>
+                    <Text fontSize="lg" fontWeight="bold">Owners</Text>
                     <Text fontSize="md">{ownerText}</Text>
                     <Text fontSize="lg" fontWeight="bold">Properties</Text>
                     {attributesOrPropertiesDisplay}

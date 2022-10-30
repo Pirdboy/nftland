@@ -14,15 +14,21 @@ function useNFTsForOwner(account) {
             let nfts = await ServerApi.GetNftsForOwner(account);
             let nfts2;
             if (nfts) {
-                nfts2 = new Array(nfts.length);
+                nfts2 = [];
                 for (let i = 0; i < nfts.length; i++) {
                     let e = nfts[i];
                     if (!e.metadata?.name) {
-                        const metadataGateway = IPFSGatewayURL(e.metadataUrl);
-                        const r = await axios.get(metadataGateway);
-                        e.metadata = r.data;
+                        try {
+                            const metadataGateway = IPFSGatewayURL(e.metadataUrl);
+                            const r = await axios.get(metadataGateway);
+                            e.metadata = r.data;
+                            nfts2.push(e);
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    } else {
+                        nfts2.push(e);
                     }
-                    nfts2[i] = e;
                 }
             } else {
                 nfts2 = [];
@@ -30,6 +36,7 @@ function useNFTsForOwner(account) {
             setNFTList(nfts2);
             setLoading(false);
         } catch (error) {
+            setNFTList([]);
             setError(error);
             setLoading(false);
         }
