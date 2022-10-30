@@ -50,6 +50,10 @@ contract NFTLandMarket is SignatureVerification, Ownable, ReentrancyGuard, Pause
     uint8 private constant TOKEN_TYPE_ERC721 = 1;
     uint8 private constant TOKEN_TYPE_ERC1155 = 2;
 
+    // 98%的费用归offerer所有
+    uint256 private constant offererFeeNumerator = 98;
+    uint256 private constant offererFeeDenominator = 100;
+
     address private nftlandCollection;
     mapping(bytes => SaleState) private saleStateMap;
 
@@ -136,7 +140,10 @@ contract NFTLandMarket is SignatureVerification, Ownable, ReentrancyGuard, Pause
             success = TransferHelper.erc721SafeTransferFrom(tokenAddress, offerer, msg.sender, tokenId);
         }
 
-        // 3. 记录sale状态, 触发事件
+        // 3. 给offerer转账
+        payable(offerer).transfer(msg.value * offererFeeNumerator / offererFeeDenominator);
+
+        // 4. 记录sale状态, 触发事件
         saleStateMap[_signature] = SaleState.Executed;
         emit SaleExecuted(_signature, offerer, msg.sender);
     }
