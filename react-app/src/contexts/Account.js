@@ -29,7 +29,8 @@ function AccountContextProvider({ children }) {
 
     const connect = useCallback(async () => {
         if (!metaMaskProvider) {
-            throw new Error("metamask is not installed");
+            console.error("metamask is not installed");
+            return;
         }
         const accounts = await metaMaskProvider.send("eth_requestAccounts", []);
         const chainId = (await metaMaskProvider.getNetwork()).chainId;
@@ -73,7 +74,8 @@ function AccountContextProvider({ children }) {
     useEffect(() => {
         const checkMetamaskConnect = async () => {
             if (!metaMaskProvider) {
-                throw new Error("metamask is not installed");
+                console.error('metamask is not installed');
+                return;
             }
             const accounts = await metaMaskProvider.send('eth_accounts', []);
             if (accounts.length === 0) {

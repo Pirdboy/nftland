@@ -35,7 +35,7 @@ const NetworkWarning = ({ close }) => {
 };
 
 function App() {
-    const { chainId, connect } = useAccountContext();
+    const { chainId } = useAccountContext();
     const [showNetworkWarning, setShowNetworkWarning] = useState(false);
     console.log("node env", process.env.NODE_ENV);
     useEffect(() => {
@@ -46,21 +46,6 @@ function App() {
         }
     }, [chainId]);
 
-    // check metamask connect
-    useEffect(() => {
-        const checkMetamaskConnect = async () => {
-            const { ethereum } = window;
-            if (!ethereum) {
-                return;
-            }
-            const accounts = await ethereum.request({ method: 'eth_accounts' });
-            if (accounts.length !== 0) {
-                connect();
-            }
-        };
-        checkMetamaskConnect();
-        // eslint-disable-next-line
-    }, [])
     return (
         <Background>
             {
