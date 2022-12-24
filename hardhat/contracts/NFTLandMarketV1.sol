@@ -35,7 +35,7 @@ enum SaleState {
     Canceled
 }
 
-contract NFTLandMarket is SignatureVerification, Ownable, ReentrancyGuard, Pauseable {
+contract NFTLandMarketV1 is SignatureVerification, Ownable, ReentrancyGuard, Pauseable {
     bytes32 constant salt = 0xcab6554389422575ff776cbe4c196fff08454285c466423b2f91b6ebfa166ca5;
     uint256 private constant CHAINID = 5;
     bytes32 private constant SALE_PARAMETERS_TYPEHASH =
